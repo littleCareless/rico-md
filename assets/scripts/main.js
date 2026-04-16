@@ -173,12 +173,13 @@ function formatDateTime(timestamp) {
 
 function formatStatusDateTime(timestamp) {
   if (!timestamp) return '--:--:--';
-  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+  const date = new Date(timestamp);
+  return `${date.toLocaleDateString('zh-CN')} ${date.toLocaleTimeString('zh-CN', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     hour12: false
-  });
+  })}`;
 }
 
 function syncLastUpdateTime() {

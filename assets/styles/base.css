@@ -485,7 +485,8 @@ body {
 .status-bar {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: var(--space-md);
   height: var(--status-bar-height);
   padding: 0 var(--space-md);
   border-top: 1px solid var(--color-border);
@@ -499,6 +500,10 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-md);
+}
+
+.status-right {
+  justify-content: flex-start;
 }
 
 .status-item { display: flex; align-items: center; gap: 4px; white-space: nowrap; }

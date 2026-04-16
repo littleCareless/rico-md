@@ -110,6 +110,44 @@ function applyInlineStyles(html, styleConfig, codeTheme) {
   return container.outerHTML;
 }
 
+function applyCodeThemeStyles(doc, codeTheme) {
+  if (!codeTheme) return;
+
+  const blocks = doc.querySelectorAll('[data-code-block="true"]');
+
+  blocks.forEach((block) => {
+    const header = block.querySelector('.md-code-block-header');
+    const body = block.querySelector('.md-code-block-body');
+    const code = block.querySelector('.md-code-block-code');
+
+    block.setAttribute(
+      'style',
+      `margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15); background: ${codeTheme.bg}; border: 1px solid ${codeTheme.borderColor};`
+    );
+
+    if (header) {
+      header.setAttribute(
+        'style',
+        `display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: ${codeTheme.headerBg}; border-bottom: 1px solid ${codeTheme.borderColor};`
+      );
+    }
+
+    if (body) {
+      body.setAttribute(
+        'style',
+        `padding: 16px; overflow-x: auto; background: ${codeTheme.bg};`
+      );
+    }
+
+    if (code) {
+      code.setAttribute(
+        'style',
+        `display: block; color: ${codeTheme.textColor}; font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre;`
+      );
+    }
+  });
+}
+
 /**
  * 分组连续图片为网格布局
  * @param {Document} doc
