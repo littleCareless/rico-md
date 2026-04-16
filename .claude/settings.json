@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '/<style>/,/<\\\\/style>/' \"d:/github3/rico-md/index.html\")",
+      "Bash(node -e ' *)",
+      "Bash(ls -la d:/github3/rico-md/styles/*.css)",
+      "Bash(python -m http.server 8080)",
+      "Bash(curl -s http://localhost:8080/index.html)"
+    ]
+  }
+}

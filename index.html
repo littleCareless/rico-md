@@ -3,1061 +3,185 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>公众号排版器</title>
-
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-5FTJSWC1Z5"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    gtag('config', 'G-5FTJSWC1Z5');
-  </script>
+  <title>Rico MD - 公众号 Markdown 编辑器</title>
+  <meta name="description" content="Rico MD - 一个专为微信公众号设计的 Markdown 编辑器，支持实时预览、一键复制富文本、18 种精美样式主题、智能图片处理">
+  <meta name="keywords" content="公众号编辑器,Markdown编辑器,微信排版,富文本复制,Markdown转公众号">
+  <meta name="author" content="Rico">
+  <meta property="og:title" content="Rico MD - 公众号 Markdown 编辑器">
+  <meta property="og:description" content="一个专为微信公众号设计的 Markdown 编辑器，支持实时预览、一键复制">
+  <meta property="og:url" content="https://aigocode.com/invite/D9M2K57E">
+  <meta property="og:type" content="website">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/svg+xml" href="favicon.svg">
-  <link rel="alternate icon" href="favicon.svg">
-  <link rel="mask-icon" href="favicon.svg" color="#0066FF">
+  <link rel="icon" type="image/svg+xml" href="assets/images/favicon.svg">
+  <link rel="alternate icon" href="assets/images/favicon.svg">
+  <link rel="mask-icon" href="assets/images/favicon.svg" color="#0066FF">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="assets/styles/base.css">
+  <link rel="stylesheet" href="assets/styles/editor.css">
+  <link rel="stylesheet" href="assets/styles/panel.css">
 
   <!-- Markdown 渲染库 -->
   <script src="https://cdn.jsdelivr.net/npm/markdown-it@14.0.0/dist/markdown-it.min.js"></script>
 
   <!-- 代码高亮库 -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/es/highlight.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/highlight.min.js"></script>
 
-  <!-- Turndown - HTML 转 Markdown 库 -->
+  <!-- Turndown - HTML 转 Markdown -->
   <script src="https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.js"></script>
 
   <!-- Vue.js -->
   <script src="https://cdn.jsdelivr.net/npm/vue@3.4.15/dist/vue.global.prod.js"></script>
-
-  <!-- html2canvas - 用于生成小红书图片 -->
-  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-
-  <style>
-    :root {
-      --color-primary: #000;
-      --color-secondary: #666;
-      --color-tertiary: #999;
-      --color-accent: #0066FF;
-      --color-bg: #FAFAFA;
-      --color-surface: #FFF;
-      --color-border: #E0E0E0;
-      --color-light-border: #F0F0F0;
-      --space-unit: 8px;
-      --space-xs: calc(var(--space-unit) * 1);
-      --space-sm: calc(var(--space-unit) * 2);
-      --space-md: calc(var(--space-unit) * 3);
-      --space-lg: calc(var(--space-unit) * 4);
-      --space-xl: calc(var(--space-unit) * 6);
-      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-      --font-mono: "SF Mono", Monaco, "Cascadia Code", "Consolas", monospace;
-    }
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: var(--font-sans);
-      font-size: 15px;
-      line-height: 1.6;
-      color: var(--color-primary);
-      background-color: var(--color-bg);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    #app {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      grid-template-rows: auto auto 1fr;
-      height: 100vh;
-      max-width: 1600px;
-      margin: 0 auto;
-      background: var(--color-surface);
-    }
-
-    /* 顶部栏 */
-    .header {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: var(--space-sm) var(--space-lg);
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-surface);
-    }
-
-    .logo {
-      font-size: 16px;
-      font-weight: 600;
-      color: var(--color-primary);
-      letter-spacing: -0.02em;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .creator-info {
-      font-size: 12px;
-      font-weight: 400;
-      color: var(--color-tertiary);
-      margin-left: 12px;
-    }
-
-    .creator-info a {
-      color: var(--color-accent);
-      text-decoration: none;
-      transition: opacity 120ms;
-    }
-
-    .creator-info a:hover {
-      opacity: 0.7;
-    }
-
-    .github-link {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px;
-      height: 32px;
-      border-radius: 6px;
-      color: var(--color-secondary);
-      transition: all 120ms;
-      text-decoration: none;
-    }
-
-    .github-link:hover {
-      background: var(--color-bg);
-      color: var(--color-primary);
-      transform: scale(1.05);
-    }
-
-    .github-link svg {
-      width: 20px;
-      height: 20px;
-    }
-
-    /* 样式选择区 - 横向滚动 */
-    .styles-section {
-      grid-column: 1 / -1;
-      padding: var(--space-sm) 0;
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-surface);
-      overflow: hidden;
-    }
-
-    .styles-container {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      padding: 0 var(--space-lg);
-    }
-
-    .styles-label {
-      font-size: 12px;
-      color: var(--color-tertiary);
-      font-weight: 500;
-      flex-shrink: 0;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
-    .styles-scroll-wrapper {
-      flex: 1;
-      overflow-x: auto;
-      overflow-y: hidden;
-      scroll-behavior: smooth;
-      padding: 2px 0;
-    }
-
-    .styles-scroll-wrapper::-webkit-scrollbar {
-      height: 6px;
-    }
-
-    .styles-scroll-wrapper::-webkit-scrollbar-thumb {
-      background: var(--color-border);
-      border-radius: 3px;
-    }
-
-    .styles-list {
-      display: flex;
-      gap: 8px;
-      padding: 0 2px;
-    }
-
-    .style-card {
-      padding: 6px 12px;
-      border: 1px solid var(--color-light-border);
-      border-radius: 6px;
-      background: var(--color-surface);
-      cursor: pointer;
-      transition: all 120ms;
-      font-size: 12px;
-      color: var(--color-primary);
-      white-space: nowrap;
-      flex-shrink: 0;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      position: relative;
-    }
-
-    .style-card:hover {
-      border-color: var(--color-accent);
-      background: var(--color-bg);
-    }
-
-    .style-card.active {
-      border-color: var(--color-accent);
-      background: var(--color-accent);
-      color: var(--color-surface);
-      font-weight: 500;
-    }
-
-    .style-card.recommended::before {
-      content: '✨';
-      font-size: 10px;
-      margin-right: 2px;
-    }
-
-    .style-card.starred::after {
-      content: '⭐';
-      font-size: 10px;
-      margin-left: 2px;
-    }
-
-    /* 主内容区 */
-    .main-content {
-      display: contents;
-    }
-
-    /* 编辑器面板 */
-    .editor-panel {
-      display: flex;
-      flex-direction: column;
-      border-right: 1px solid var(--color-border);
-      overflow: hidden;
-    }
-
-    .markdown-input-container {
-      flex: 1;
-      overflow: hidden;
-      padding: var(--space-md);
-      background: var(--color-surface);
-    }
-
-    .markdown-input {
-      width: 100%;
-      height: 100%;
-      padding: var(--space-lg);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      font-family: var(--font-mono);
-      font-size: 14px;
-      line-height: 1.6;
-      resize: none;
-      background: var(--color-surface);
-      color: var(--color-primary);
-      transition: all 120ms;
-    }
-
-    .markdown-input:focus {
-      outline: 2px solid var(--color-accent);
-      outline-offset: -2px;
-    }
-
-    .markdown-input.drag-over {
-      background: var(--color-bg);
-      border-color: var(--color-accent);
-      box-shadow: 0 0 0 4px rgba(0, 102, 255, 0.1);
-    }
-
-    /* 编辑器底部工具栏 */
-    .editor-footer {
-      padding: var(--space-sm) var(--space-lg);
-      border-top: 1px solid var(--color-border);
-      background: var(--color-bg);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .upload-section {
-      display: flex;
-      align-items: center;
-      gap: var(--space-md);
-    }
-
-    .upload-label {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      cursor: pointer;
-      padding: var(--space-sm) var(--space-md);
-      border: 1px solid var(--color-border);
-      border-radius: 6px;
-      background: var(--color-surface);
-      color: var(--color-secondary);
-      font-size: 13px;
-      transition: all 120ms;
-    }
-
-    .upload-label:hover {
-      background: var(--color-surface);
-      border-color: var(--color-accent);
-      color: var(--color-accent);
-    }
-
-    .upload-hints {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
-
-    .upload-hint {
-      font-size: 12px;
-      color: var(--color-tertiary);
-    }
-
-    .feishu-hint {
-      font-size: 11px;
-      color: var(--color-accent);
-      line-height: 1.4;
-      opacity: 0.8;
-    }
-
-    .char-count {
-      font-size: 12px;
-      color: var(--color-tertiary);
-      font-family: var(--font-mono);
-    }
-
-    /* 预览面板 */
-    .preview-panel {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .preview-header {
-      padding: var(--space-sm) var(--space-lg);
-      border-bottom: 1px solid var(--color-border);
-      background: var(--color-bg);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .preview-title {
-      font-size: 13px;
-      font-weight: 500;
-      color: var(--color-secondary);
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .mode-switcher {
-      display: flex;
-      gap: 4px;
-      background: var(--color-bg);
-      border-radius: 6px;
-      padding: 2px;
-    }
-
-    .mode-toggle-btn {
-      padding: 6px 12px;
-      background: transparent;
-      border: none;
-      border-radius: 4px;
-      color: var(--color-secondary);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 120ms;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      text-transform: none;
-      font-weight: normal;
-    }
-
-    .mode-toggle-btn:hover {
-      color: var(--color-primary);
-    }
-
-    .mode-toggle-btn.active {
-      background: var(--color-surface);
-      color: var(--color-primary);
-      font-weight: 500;
-    }
-
-    .mode-toggle-btn svg {
-      width: 14px;
-      height: 14px;
-    }
-
-    .preview-actions {
-      display: flex;
-      gap: var(--space-sm);
-      align-items: center;
-    }
-
-    .star-btn {
-      width: 28px;
-      height: 28px;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      color: var(--color-secondary);
-      cursor: pointer;
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 120ms;
-    }
-
-    .star-btn:hover {
-      background: var(--color-bg);
-      color: var(--color-accent);
-    }
-
-    .star-btn.active {
-      background: var(--color-accent);
-      color: var(--color-surface);
-      border-color: var(--color-accent);
-    }
-
-    .star-btn svg {
-      width: 14px;
-      height: 14px;
-      stroke-width: 2;
-    }
-
-    .copy-btn {
-      padding: 6px 16px;
-      background: var(--color-primary);
-      color: var(--color-surface);
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 120ms;
-      letter-spacing: 0.02em;
-    }
-
-    .copy-btn:hover {
-      opacity: 0.8;
-    }
-
-    .copy-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .copy-btn.success {
-      background: #00C853;
-    }
-
-    .preview-content {
-      flex: 1;
-      overflow-y: auto;
-      background: var(--color-surface);
-      position: relative;
-    }
-
-    .preview-container {
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 20px 32px 48px 32px;
-      line-height: 1.8;
-      position: relative;
-    }
-
-    .preview-container.layout-mode img {
-      cursor: pointer;
-      transition: all 120ms;
-    }
-
-    .preview-container.layout-mode img:hover {
-      outline: 2px solid var(--color-accent);
-      outline-offset: 2px;
-    }
-
-    /* 图片控制面板 */
-    .image-control-panel {
-      background: white;
-      border: 2px solid var(--color-accent);
-      border-radius: 8px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-      padding: 16px;
-      animation: fadeIn 200ms ease-out;
-      min-width: 300px;
-    }
-
-    @keyframes fadeIn {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
-    }
-
-    .control-panel-inner {
-      display: flex;
-      gap: 16px;
-      align-items: center;
-    }
-
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .control-group label {
-      font-size: 12px;
-      color: var(--color-secondary);
-      font-weight: 500;
-    }
-
-    .width-slider {
-      width: 120px;
-      height: 4px;
-      -webkit-appearance: none;
-      appearance: none;
-      background: var(--color-border);
-      border-radius: 2px;
-      outline: none;
-    }
-
-    .width-slider::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 12px;
-      height: 12px;
-      background: var(--color-accent);
-      border-radius: 50%;
-      cursor: pointer;
-    }
-
-    .width-slider::-moz-range-thumb {
-      width: 12px;
-      height: 12px;
-      background: var(--color-accent);
-      border-radius: 50%;
-      cursor: pointer;
-      border: none;
-    }
-
-    .width-value {
-      font-size: 11px;
-      color: var(--color-tertiary);
-      font-family: var(--font-mono);
-      min-width: 45px;
-    }
-
-    .align-buttons {
-      display: flex;
-      gap: 4px;
-    }
-
-    .align-buttons button {
-      width: 24px;
-      height: 24px;
-      border: 1px solid var(--color-border);
-      background: var(--color-surface);
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 12px;
-      transition: all 120ms;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .align-buttons button:hover {
-      background: var(--color-bg);
-      border-color: var(--color-accent);
-    }
-
-    .align-buttons button.active {
-      background: var(--color-accent);
-      color: var(--color-surface);
-      border-color: var(--color-accent);
-    }
-
-    .empty-state {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      color: var(--color-tertiary);
-    }
-
-    .empty-state-icon {
-      width: 64px;
-      height: 64px;
-      margin-bottom: var(--space-lg);
-      opacity: 0.3;
-    }
-
-    .empty-state h3 {
-      font-size: 15px;
-      font-weight: 500;
-      color: var(--color-secondary);
-      margin-bottom: var(--space-xs);
-    }
-
-    .empty-state p {
-      font-size: 13px;
-      color: var(--color-tertiary);
-    }
-
-    /* 小红书预览样式 */
-    .xiaohongshu-preview {
-      padding: var(--space-lg);
-      overflow-y: auto;
-    }
-
-    .xiaohongshu-controls {
-      display: flex;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-lg);
-      justify-content: center;
-      flex-wrap: wrap;
-    }
-
-    .xiaohongshu-btn {
-      padding: 8px 16px;
-      background: var(--color-primary);
-      color: var(--color-surface);
-      border: none;
-      border-radius: 6px;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 120ms;
-    }
-
-    .xiaohongshu-btn:hover {
-      opacity: 0.8;
-    }
-
-    .xiaohongshu-btn:disabled {
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
-
-    .xiaohongshu-btn.secondary {
-      background: var(--color-surface);
-      color: var(--color-primary);
-      border: 1px solid var(--color-border);
-    }
-
-    .xiaohongshu-images-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: var(--space-md);
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .xiaohongshu-image-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-      transition: all 120ms;
-      cursor: pointer;
-    }
-
-    .xiaohongshu-image-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    }
-
-    .xiaohongshu-image-card img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    .xiaohongshu-image-label {
-      padding: var(--space-sm);
-      text-align: center;
-      font-size: 12px;
-      color: var(--color-secondary);
-      background: var(--color-bg);
-    }
-
-    .xiaohongshu-loading {
-      text-align: center;
-      padding: var(--space-xl);
-      color: var(--color-secondary);
-    }
-
-    .xiaohongshu-empty {
-      text-align: center;
-      padding: var(--space-xl);
-      color: var(--color-tertiary);
-    }
-
-    /* Toast 提示 */
-    .toast {
-      position: fixed;
-      bottom: var(--space-lg);
-      right: var(--space-lg);
-      padding: var(--space-md) var(--space-lg);
-      background: var(--color-primary);
-      color: var(--color-surface);
-      border-radius: 6px;
-      font-size: 13px;
-      z-index: 1000;
-      animation: slideUp 200ms ease-out;
-    }
-
-    @keyframes slideUp {
-      from {
-        transform: translateY(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateY(0);
-        opacity: 1;
-      }
-    }
-
-    .toast.success {
-      background: #00C853;
-    }
-
-    .toast.error {
-      background: #D32F2F;
-    }
-
-    /* 滚动条 */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--color-border);
-      border-radius: 4px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--color-tertiary);
-    }
-
-    /* 移动端响应式布局 */
-    @media (max-width: 768px) {
-      #app {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto 1fr;
-        height: 100vh;
-      }
-
-      .header {
-        padding: var(--space-xs) var(--space-sm);
-      }
-
-      .logo {
-        font-size: 14px;
-      }
-
-      .github-link {
-        width: 28px;
-        height: 28px;
-      }
-
-      .github-link svg {
-        width: 18px;
-        height: 18px;
-      }
-
-      .styles-section {
-        padding: var(--space-xs) 0;
-      }
-
-      .styles-container {
-        padding: 0 var(--space-sm);
-      }
-
-      .style-card {
-        font-size: 11px;
-        padding: 4px 8px;
-      }
-
-      .editor-panel {
-        border-right: none;
-        border-bottom: 1px solid var(--color-border);
-        max-height: 30vh;
-      }
-
-      .markdown-input-container {
-        padding: var(--space-sm);
-      }
-
-      .markdown-input {
-        font-size: 13px;
-        padding: var(--space-md);
-      }
-
-      .editor-footer {
-        flex-direction: column;
-        gap: var(--space-sm);
-        align-items: stretch;
-        padding: var(--space-sm) var(--space-md);
-      }
-
-      .upload-section {
-        flex-direction: column;
-        align-items: stretch;
-      }
-
-      .upload-label {
-        width: 100%;
-        justify-content: center;
-      }
-
-      .upload-hints {
-        align-items: center;
-        text-align: center;
-      }
-
-      .feishu-hint {
-        font-size: 10px;
-      }
-
-      .preview-header {
-        padding: var(--space-xs) var(--space-sm);
-      }
-
-      .preview-panel {
-        height: auto;
-      }
-
-      .preview-container {
-        padding: var(--space-lg) var(--space-md);
-      }
-
-      .toast {
-        left: var(--space-md);
-        right: var(--space-md);
-        bottom: var(--space-md);
-      }
-    }
-
-    /* 平板端优化 */
-    @media (min-width: 769px) and (max-width: 1024px) {
-      #app {
-        max-width: 100%;
-      }
-
-      .header {
-        padding: var(--space-sm) var(--space-lg);
-      }
-
-      .styles-section {
-        padding: var(--space-sm) 0;
-      }
-
-      .preview-container {
-        padding: var(--space-xl) var(--space-lg);
-      }
-    }
-  </style>
 </head>
 <body>
   <div id="app">
-    <!-- 顶部栏 -->
+    <!-- 顶部栏：Logo左侧 + 导航/GitHub右侧 -->
     <header class="header">
-      <div class="logo">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20">
-          <rect width="32" height="32" rx="6" fill="#0066FF"/>
-          <path d="M6 10 L6 22 L9 22 L9 15 L13 20 L17 15 L17 22 L20 22 L20 10 L16 10 L13 14 L10 10 Z" fill="white"/>
-          <rect x="6" y="24" width="20" height="2" rx="1" fill="white" opacity="0.7"/>
-        </svg>
-        <span>公众号排版器</span>
-        <span class="creator-info">Created by <a href="https://huasheng.ai" target="_blank" rel="noopener noreferrer">花生</a></span>
-      </div>
-      <a href="https://github.com/alchaincyf/huasheng_editor"
-         target="_blank"
-         rel="noopener noreferrer"
-         class="github-link"
-         title="查看源码">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
-          <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-        </svg>
-      </a>
-    </header>
-
-    <!-- 样式选择区 - 横向滚动 -->
-    <section class="styles-section">
-      <div class="styles-container">
-        <div class="styles-label">选择样式</div>
-        <div class="styles-scroll-wrapper">
-          <div class="styles-list">
-            <!-- 收藏的样式 -->
-            <template v-if="starredStyles.length > 0">
-              <div
-                v-for="styleKey in starredStyles"
-                :key="'star-' + styleKey"
-                class="style-card starred"
-                :class="{ active: currentStyle === styleKey }"
-                @click="currentStyle = styleKey"
-              >
-                {{ getStyleName(styleKey) }}
-              </div>
-              <div style="width: 1px; height: 20px; background: var(--color-light-border); margin: 0 4px;"></div>
-            </template>
-
-            <!-- 所有样式，添加推荐标识 -->
-            <div
-              v-for="(style, key) in STYLES"
-              :key="key"
-              class="style-card"
-              :class="{
-                active: currentStyle === key,
-                starred: isStyleStarred(key),
-                recommended: isRecommended(key)
-              }"
-              @click="currentStyle = key"
-            >
-              {{ style.name }}
-            </div>
-          </div>
+      <div class="header-left">
+        <button class="sidebar-toggle" @click="sidebarOpen = !sidebarOpen" title="文档管理">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div class="logo">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="20" height="20">
+            <rect width="32" height="32" rx="6" fill="#0066FF"/>
+            <path d="M6 10 L6 22 L9 22 L9 15 L13 20 L17 15 L17 22 L20 22 L20 10 L16 10 L13 14 L10 10 Z" fill="white"/>
+            <rect x="6" y="24" width="20" height="2" rx="1" fill="white" opacity="0.7"/>
+          </svg>
+          <span>Rico MD</span>
         </div>
       </div>
-    </section>
+      <div class="header-right">
+        <nav class="header-nav">
+          <button class="header-nav-btn" :class="{ active: activePanel === 'theme' }" @click="togglePanel('theme')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>
+            主题
+          </button>
+          <button class="header-nav-btn" :class="{ active: activePanel === 'code' }" @click="togglePanel('code')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            代码
+          </button>
+          <button class="header-nav-btn" :class="{ active: activePanel === 'settings' }" @click="togglePanel('settings')">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          </button>
+        </nav>
+        <span class="header-divider"></span>
+        <span class="creator-info">by <a href="https://ricoui.com" target="_blank" rel="noopener noreferrer">Rico</a></span>
+        <a href="https://github.com/ricocc/rico-md"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="github-link"
+           title="查看源码">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="currentColor">
+            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+          </svg>
+        </a>
+      </div>
+    </header>
 
-    <!-- 主内容区 -->
-    <div class="main-content">
+    <!-- 主内容区：左侧边栏 + 编辑器 + 预览 + 右侧面板 -->
+    <div class="main-area" :class="{ 'has-right-panel': activePanel === 'theme' || activePanel === 'code' }">
+      <!-- 左侧文档栏 -->
+      <transition name="sidebar">
+        <aside v-if="sidebarOpen" class="sidebar">
+          <div class="sidebar-section">
+            <button class="sidebar-action-btn primary" @click="clearEditor">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              新增文档
+            </button>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">文档列表</div>
+            <div class="sidebar-doc-list">
+              <div class="sidebar-doc-item active">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                <span>当前文档</span>
+              </div>
+            </div>
+          </div>
+          <div class="sidebar-section">
+            <div class="sidebar-section-title">操作</div>
+            <button class="sidebar-action-btn" @click="$refs.mdUploadSidebar.click()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              导入 .md
+            </button>
+            <input ref="mdUploadSidebar" type="file" accept=".md,.markdown" @change="handleFileUpload" style="display: none;">
+            <button class="sidebar-action-btn" @click="exportMarkdown">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              导出 Markdown
+            </button>
+            <button class="sidebar-action-btn" @click="exportHTML">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              导出 HTML
+            </button>
+          </div>
+        </aside>
+      </transition>
+
       <!-- 编辑器面板 -->
-      <div class="editor-panel">
+      <div class="editor-panel" :style="editorWidth ? { flex: 'none', width: editorWidth + '%' } : {}">
         <div class="markdown-input-container">
           <textarea
             v-model="markdownInput"
             class="markdown-input"
             :class="{ 'drag-over': isDraggingOver }"
-            @paste="handleSmartPaste"
+            @paste="onPaste"
             @drop="handleDrop"
             @dragover="handleDragOver"
             @dragenter="handleDragEnter"
             @dragleave="handleDragLeave"
+            @keydown="handleKeydown"
             placeholder="# 在这里粘贴或输入 Markdown 内容
 
 ## 功能特点
 
 - **实时预览**：所见即所得
-- **13 种样式**：随意切换
+- **18 种样式**：随意切换
 - **智能粘贴**：支持从飞书、Notion、Word 直接粘贴
-- **图片支持**：直接粘贴或拖拽图片，自动上传
-- **一键复制**：直接粘贴到公众号
-
-💡 提示：可以直接粘贴截图，或拖拽图片文件到这里"
+- **图片支持**：直接粘贴或拖拽图片
+- **一键复制**：直接粘贴到公众号"
             spellcheck="false"
           ></textarea>
         </div>
-
-        <!-- 编辑器底部工具栏 -->
-        <div class="editor-footer">
-          <div class="upload-section">
-            <label for="file-upload" class="upload-label">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="17 8 12 3 7 8"></polyline>
-                <line x1="12" y1="3" x2="12" y2="15"></line>
-              </svg>
-              <span>上传 MD 文件</span>
-              <input type="file" id="file-upload" accept=".md,.markdown" @change="handleFileUpload" style="display: none;">
-            </label>
-            <div class="upload-hints">
-              <span class="upload-hint">支持 .md / .markdown 文件</span>
-              <span class="feishu-hint">
-                💡 支持从飞书、Notion、Word 等直接粘贴，自动转换为 Markdown
-              </span>
-            </div>
-          </div>
-          <div class="char-count">
-            {{ markdownInput.length }} 字符
-          </div>
-        </div>
       </div>
+
+      <!-- 分割线：编辑器与预览 -->
+      <div class="resize-handle" data-handle="editor-preview"></div>
 
       <!-- 预览面板 -->
       <div class="preview-panel">
-        <div class="preview-header">
-          <div class="preview-title">
-            预览
-            <!-- 小红书功能入口已隐藏，待调试完成后再开放 -->
-            <!-- <div class="mode-switcher" style="display: none;">
-              <button
-                class="mode-toggle-btn"
-                :class="{ active: previewMode === 'wechat' }"
-                @click="previewMode = 'wechat'"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-                公众号
-              </button>
-              <button
-                class="mode-toggle-btn"
-                :class="{ active: previewMode === 'xiaohongshu' }"
-                @click="previewMode = 'xiaohongshu'"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="3" width="7" height="7" rx="1"/>
-                  <rect x="14" y="3" width="7" height="7" rx="1"/>
-                  <rect x="3" y="14" width="7" height="7" rx="1"/>
-                  <rect x="14" y="14" width="7" height="7" rx="1"/>
-                </svg>
-                小红书
-              </button>
-            </div> -->
+        <!-- 预览工具栏 -->
+        <div class="preview-toolbar">
+          <div class="device-toggle">
+            <button class="device-toggle-btn" :class="{ active: previewMode === 'mobile' }" @click="previewMode = 'mobile'" title="手机预览">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12" y2="18"/></svg>
+            </button>
+            <button class="device-toggle-btn" :class="{ active: previewMode === 'desktop' }" @click="previewMode = 'desktop'" title="桌面预览">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            </button>
           </div>
-          <div class="preview-actions">
+          <div class="copy-buttons">
             <button
-              class="star-btn"
-              :class="{ active: isStyleStarred(currentStyle) }"
-              @click="toggleStarStyle(currentStyle)"
-              title="收藏此样式"
+              class="copy-btn twitter-btn"
+              :disabled="!renderedContent"
+              @click="copyToTwitter"
+              title="复制到 X (Twitter)"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" :fill="isStyleStarred(currentStyle) ? 'currentColor' : 'none'">
-                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-              </svg>
+              复制到
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </button>
             <button
               class="copy-btn"
               :class="{ success: copySuccess }"
               :disabled="!renderedContent"
-              @click="copyToClipboard"
+              @click="doCopy"
             >
-              {{ copySuccess ? '✓ 已复制' : '复制到公众号' }}
+              {{ copySuccess ? '已复制' : '复制到公众号' }}
             </button>
           </div>
         </div>
 
-        <!-- 公众号预览模式 -->
+        <!-- 预览内容 -->
         <div class="preview-content">
           <div v-if="!renderedContent" class="empty-state">
             <svg class="empty-state-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1066,61 +190,136 @@
             <h3>开始编辑</h3>
             <p>左侧输入 Markdown，右侧实时预览</p>
           </div>
-          <div v-else class="preview-container" v-html="renderedContent"></div>
+          <div v-else class="preview-container" :class="{ 'mobile-mode': previewMode === 'mobile' }" v-html="renderedContent"></div>
         </div>
+      </div>
 
-        <!-- 小红书预览模式（已隐藏） -->
-        <!-- <div v-if="previewMode === 'xiaohongshu'" class="xiaohongshu-preview">
-          <div class="xiaohongshu-controls">
-            <button
-              class="xiaohongshu-btn"
-              :disabled="!renderedContent || xiaohongshuGenerating"
-              @click="generateXiaohongshuImages"
+      <!-- 分割线：预览与右侧面板 -->
+      <div class="resize-handle" data-handle="preview-right" v-if="activePanel === 'theme' || activePanel === 'code'"></div>
+
+      <!-- 右侧面板（主题/代码） -->
+      <transition name="right-panel-slide">
+        <div v-if="activePanel === 'theme' || activePanel === 'code'" class="right-panel" :style="rightPanelWidth ? { width: rightPanelWidth + 'px' } : {}">
+          <div class="right-panel-tabs">
+            <button 
+              class="right-panel-tab" 
+              :class="{ active: activePanel === 'theme' }"
+              @click="togglePanel('theme')"
             >
-              {{ xiaohongshuGenerating ? '生成中...' : '生成小红书图片' }}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 0 20"/></svg>
+              主题
             </button>
-            <button
-              class="xiaohongshu-btn secondary"
-              :disabled="xiaohongshuImages.length === 0"
-              @click="downloadAllXiaohongshuImages"
+            <button 
+              class="right-panel-tab" 
+              :class="{ active: activePanel === 'code' }"
+              @click="togglePanel('code')"
             >
-              批量下载 ({{ xiaohongshuImages.length }})
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+              代码
+            </button>
+            <button class="right-panel-close" @click="togglePanel(activePanel)">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
           </div>
+          <div class="right-panel-body">
+            <!-- 主题面板 -->
+            <template v-if="activePanel === 'theme'">
+              <div class="theme-grid">
+                <template v-for="cat in categorizedThemes" :key="cat.category">
+                  <div class="theme-category-label">{{ cat.category }}</div>
+                  <div
+                    v-for="theme in cat.themes"
+                    :key="theme.key"
+                    class="theme-card"
+                    :class="{ active: currentStyle === theme.key }"
+                    @click="selectTheme(theme.key)"
+                  >
+                    <span class="theme-card-name">{{ theme.name }}</span>
+                    <span v-if="theme.starred" class="theme-card-star" @click.stop="toggleStar(theme.key)">★</span>
+                    <span v-else class="theme-card-star empty" @click.stop="toggleStar(theme.key)">☆</span>
+                    <span v-if="theme.recommended" class="theme-card-badge">推荐</span>
+                  </div>
+                </template>
+              </div>
+            </template>
 
-          <div v-if="xiaohongshuGenerating" class="xiaohongshu-loading">
-            <p>正在生成小红书图片，请稍候...</p>
+            <!-- 代码主题面板 -->
+            <template v-if="activePanel === 'code'">
+              <div class="code-theme-grid">
+                <div
+                  v-for="ct in codeThemeList"
+                  :key="ct.key"
+                  class="code-theme-card"
+                  :class="{ active: currentCodeTheme === ct.key }"
+                  @click="selectCodeTheme(ct.key)"
+                >
+                  <div class="code-theme-name">{{ ct.name }}</div>
+                  <div class="code-theme-desc">{{ ct.description }}</div>
+                </div>
+              </div>
+            </template>
           </div>
+        </div>
+      </transition>
+    </div>
 
-          <div v-else-if="xiaohongshuImages.length === 0" class="xiaohongshu-empty">
-            <p>点击「生成小红书图片」按钮，将内容转换为适合小红书发布的多图</p>
+    <!-- 底部状态栏 -->
+    <footer class="status-bar">
+      <div class="status-left">
+        <span class="status-item status-saved">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          已保存
+        </span>
+      </div>
+      <div class="status-right">
+        <span class="status-item">{{ charCount }} 字符 · {{ wordCount }} 词</span>
+        <span class="status-item">最后更新：{{ lastUpdateTime }}</span>
+      </div>
+    </footer>
+
+    <!-- 设置面板覆盖层 -->
+    <transition name="side-panel">
+      <div v-if="activePanel === 'settings'" class="settings-overlay">
+        <div class="settings-panel">
+          <div class="settings-panel-header">
+            <h3 class="settings-panel-title">设置</h3>
+            <button class="settings-panel-close" @click="togglePanel('settings')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            </button>
           </div>
-
-          <div v-else class="xiaohongshu-images-grid">
-            <div
-              v-for="(image, index) in xiaohongshuImages"
-              :key="index"
-              class="xiaohongshu-image-card"
-              @click="downloadXiaohongshuImage(image, index)"
-            >
-              <img :src="image.dataUrl" :alt="`第 ${index + 1} 张`">
-              <div class="xiaohongshu-image-label">
-                第 {{ index + 1 }} / {{ xiaohongshuImages.length }} 张
+          <div class="settings-panel-body">
+            <div class="panel-settings-group">
+              <label class="settings-label">
+                <span>同步滚动</span>
+                <div class="toggle-switch" :class="{ active: syncScrollEnabled }" @click="syncScrollEnabled = !syncScrollEnabled">
+                  <div class="toggle-knob"></div>
+                </div>
+              </label>
+            </div>
+            <div class="panel-settings-group">
+              <div class="settings-label">快捷键</div>
+              <div class="settings-shortcuts">
+                <div><kbd>Ctrl</kbd>+<kbd>S</kbd> 保存</div>
+                <div><kbd>Ctrl</kbd>+<kbd>B</kbd> 加粗</div>
+                <div><kbd>Ctrl</kbd>+<kbd>I</kbd> 斜体</div>
+                <div><kbd>Ctrl</kbd>+<kbd>K</kbd> 链接</div>
+                <div><kbd>Tab</kbd> 缩进</div>
               </div>
             </div>
           </div>
-        </div> -->
+        </div>
       </div>
-    </div>
+    </transition>
 
-    <!-- Toast 提示 -->
-    <div v-if="toast.show" class="toast" :class="toast.type">
-      {{ toast.message }}
-    </div>
+    <!-- Toast -->
+    <transition name="toast-fade">
+      <div v-if="toastState.show" class="toast-container">
+        <div class="toast" :class="'toast-' + toastState.type">{{ toastState.message }}</div>
+      </div>
+    </transition>
   </div>
 
-  <!-- 加载脚本 -->
-  <script src="styles.js?v=2"></script>
-  <script src="app.js?v=2"></script>
+  <!-- 应用入口 -->
+  <script type="module" src="assets/scripts/main.js"></script>
 </body>
 </html>
