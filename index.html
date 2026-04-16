@@ -88,9 +88,18 @@
           <div class="sidebar-section">
             <div class="sidebar-section-title">文档列表</div>
             <div class="sidebar-doc-list">
-              <div class="sidebar-doc-item active">
+              <div
+                v-for="doc in documents"
+                :key="doc.id"
+                class="sidebar-doc-item"
+                :class="{ active: activeDocumentId === doc.id }"
+                @click="switchDocument(doc.id)"
+              >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                <span>当前文档</span>
+                <div class="sidebar-doc-meta">
+                  <span class="sidebar-doc-title">{{ getDocumentDisplayTitle(doc) }}</span>
+                  <span class="sidebar-doc-time">保存于 {{ formatDateTime(doc.updatedAt) }}</span>
+                </div>
               </div>
             </div>
           </div>

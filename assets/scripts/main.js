@@ -24,6 +24,8 @@ const renderedContent = ref('');
 const currentStyle = ref('wechat-default');
 const starredStyles = ref([]);
 const currentCodeTheme = ref(DEFAULT_CODE_THEME);
+const documents = ref([]);
+const activeDocumentId = ref(null);
 const previewMode = ref('desktop'); // 'desktop' | 'mobile'
 const isDraggingOver = ref(false);
 const copySuccess = ref(false);
@@ -128,10 +130,145 @@ let syncScrollEnabled = ref(true);
 // ── 分类主题列表 ──
 const categorizedThemes = ref(getCategorizedThemes());
 const codeThemeList = getCodeThemeList();
+let suppressDocumentSync = false;
+const UNTITLED_PREFIX = '\u672A\u547D\u540D\u6587\u6863';
+
+function createDocumentId() {
+  return `doc-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+}
+
+function extractMarkdownTitle(content) {
+  const match = (content || '').match(/^\s*#\s+(.+?)\s*$/m);
+  return match ? match[1].trim() : '';
+}
+
+function getActiveDocument() {
+  return documents.value.find((doc) => doc.id === activeDocumentId.value) || null;
+}
+
+function sanitizeFilename(name) {
+  return (name || 'article')
+    .replace(/[<>:"/\\|?*\u0000-\u001F]/g, '-')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 80) || 'article';
+}
+
+function formatDateTime(timestamp) {
+  if (!timestamp) return '--';
+  const date = new Date(timestamp);
+  const now = new Date();
+  const sameDay = date.toDateString() === now.toDateString();
+
+  if (sameDay) {
+    return date.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit', hour12: false });
+  }
+
+  return `${date.toLocaleDateString('zh-CN')} ${date.toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  })}`;
+}
+
+function formatStatusDateTime(timestamp) {
+  if (!timestamp) return '--:--:--';
+  return new Date(timestamp).toLocaleTimeString('zh-CN', {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    hour12: false
+  });
+}
+
+function syncLastUpdateTime() {
+  const activeDoc = getActiveDocument();
+  lastUpdateTime.value = formatStatusDateTime(activeDoc?.updatedAt);
+}
+
+function syncEditorFromActiveDocument() {
+  const activeDoc = getActiveDocument();
+  suppressDocumentSync = true;
+  markdownInput.value = activeDoc ? activeDoc.content : '';
+  syncLastUpdateTime();
+}
+
+function persistDocumentState() {
+  const activeDoc = getActiveDocument();
+  savePreferences(
+    currentStyle.value,
+    activeDoc ? activeDoc.content : markdownInput.value,
+    documents.value,
+    activeDocumentId.value
+  );
+}
+
+function schedulePersistDocumentState() {
+  const activeDoc = getActiveDocument();
+  debounceSaveContent({
+    content: activeDoc ? activeDoc.content : markdownInput.value,
+    documents: documents.value,
+    activeDocumentId: activeDocumentId.value
+  });
+}
+
+function switchDocument(documentId) {
+  if (!documentId || documentId === activeDocumentId.value) return;
+  persistDocumentState();
+  activeDocumentId.value = documentId;
+  syncEditorFromActiveDocument();
+}
+
+function createNewDocument(content = '', title = '') {
+  const doc = buildDocument({ content, title });
+  documents.value.push(doc);
+  activeDocumentId.value = doc.id;
+  syncEditorFromActiveDocument();
+  persistDocumentState();
+  return doc;
+}
+
+function getUntitledTitle(index = getUntitledDocumentIndex()) {
+  return `${UNTITLED_PREFIX} ${index}`;
+}
+
+function getUntitledDocumentIndex(list = documents.value) {
+  let maxIndex = 0;
+  const pattern = new RegExp(`^${UNTITLED_PREFIX}\\s+(\\d+)$`);
+
+  list.forEach((doc) => {
+    const match = (doc.title || '').match(pattern);
+    if (match) {
+      maxIndex = Math.max(maxIndex, Number(match[1]));
+    }
+  });
+
+  return maxIndex + 1;
+}
+
+function buildDocument({ content = '', title = '', createdAt = Date.now(), updatedAt = createdAt } = {}) {
+  return {
+    id: createDocumentId(),
+    title: title || getUntitledTitle(),
+    content,
+    createdAt,
+    updatedAt
+  };
+}
+
+function resolveDocumentDisplayTitle(doc) {
+  if (!doc) return UNTITLED_PREFIX;
+  return extractMarkdownTitle(doc.content) || doc.title || UNTITLED_PREFIX;
+}
 
 function updateStats() {
   const text = markdownInput.value;
-  if (!text) { wordCount.value = 0; charCount.value = 0; readTime.value = 0; return; }
+  if (!text) {
+    wordCount.value = 0;
+    charCount.value = 0;
+    readTime.value = 0;
+    return;
+  }
 
   // 字符数
   charCount.value = text.length;
@@ -139,15 +276,15 @@ function updateStats() {
   // 中文字数 + 英文词数
   const chineseChars = (text.match(/[\u4e00-\u9fff\u3400-\u4dbf]/g) || []).length;
   const englishWords = text.replace(/[\u4e00-\u9fff\u3400-\u4dbf]/g, ' ')
-    .split(/\s+/).filter(w => w.length > 0).length;
+    .split(/\s+/)
+    .filter((w) => w.length > 0)
+    .length;
   const total = chineseChars + englishWords;
 
   wordCount.value = total;
   readTime.value = Math.max(1, Math.ceil(total / 300));
 
   // 更新时间戳
-  const now = new Date();
-  lastUpdateTime.value = now.toLocaleTimeString('zh-CN', { hour12: false });
 }
 
 // ── 渲染 ──
@@ -297,7 +434,12 @@ function handleFileUpload(event) {
   if (!file) return;
 
   const reader = new FileReader();
-  reader.onload = (e) => { markdownInput.value = e.target.result; };
+  reader.onload = (e) => {
+    const content = e.target.result || '';
+    const fileTitle = file.name.replace(/\.(md|markdown)$/i, '');
+    const title = extractMarkdownTitle(content) || fileTitle || getUntitledTitle();
+    createNewDocument(content, title);
+  };
   reader.onerror = () => { toast.show('文件读取失败', 'error'); };
   reader.readAsText(file);
   event.target.value = '';
@@ -305,22 +447,24 @@ function handleFileUpload(event) {
 
 // ── 导出 ──
 function exportMarkdown() {
+  const activeDoc = getActiveDocument();
   const blob = new Blob([markdownInput.value], { type: 'text/markdown' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'article.md';
+  a.download = `${sanitizeFilename(resolveDocumentDisplayTitle(activeDoc))}.md`;
   a.click();
   URL.revokeObjectURL(url);
   toast.show('已导出 Markdown', 'success');
 }
 
 function exportHTML() {
+  const activeDoc = getActiveDocument();
   const blob = new Blob([renderedContent.value], { type: 'text/html' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = 'article.html';
+  a.download = `${sanitizeFilename(resolveDocumentDisplayTitle(activeDoc))}.html`;
   a.click();
   URL.revokeObjectURL(url);
   toast.show('已导出 HTML', 'success');
@@ -380,7 +524,7 @@ function handleKeydown(event) {
 
   if (isMod && event.key === 's') {
     event.preventDefault();
-    savePreferences(currentStyle.value, markdownInput.value);
+    persistDocumentState();
     toast.show('已保存', 'success');
     return;
   }
@@ -462,7 +606,7 @@ function setupSyncScroll() {
 
 // ── 默认示例 ──
 function loadDefaultExample() {
-  markdownInput.value = `![](https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&h=400&fit=crop)
+  return `![](https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&h=400&fit=crop)
 
 # 公众号 Markdown 编辑器
 
@@ -541,15 +685,27 @@ const markdown = \`![图片](img::\${imageId})\`;
 const app = createApp({
   setup() {
     // Watchers
-    watch(markdownInput, () => {
+    watch(markdownInput, (value) => {
       renderMarkdown();
       updateStats();
-      debounceSaveContent(markdownInput.value);
+
+      if (suppressDocumentSync) {
+        suppressDocumentSync = false;
+        return;
+      }
+
+      const activeDoc = getActiveDocument();
+      if (!activeDoc) return;
+
+      activeDoc.content = value;
+      activeDoc.updatedAt = Date.now();
+      syncLastUpdateTime();
+      schedulePersistDocumentState();
     });
 
     watch(currentStyle, () => {
       renderMarkdown();
-      savePreferences(currentStyle.value, markdownInput.value);
+      persistDocumentState();
     });
 
     // 初始化
@@ -583,11 +739,21 @@ const app = createApp({
       initPasteHandler();
 
       // 加载内容
-      if (prefs.content) {
-        markdownInput.value = prefs.content;
+      if (prefs.documents.length > 0) {
+        documents.value = prefs.documents;
+      } else if (prefs.content) {
+        documents.value = [buildDocument({ content: prefs.content, title: getUntitledTitle(getUntitledDocumentIndex([])) })];
       } else {
-        loadDefaultExample();
+        documents.value = [buildDocument({ content: loadDefaultExample(), title: getUntitledTitle(getUntitledDocumentIndex([])) })];
       }
+
+      activeDocumentId.value = prefs.activeDocumentId && documents.value.some((doc) => doc.id === prefs.activeDocumentId)
+        ? prefs.activeDocumentId
+        : documents.value[0]?.id || null;
+
+      syncEditorFromActiveDocument();
+      updateStats();
+      persistDocumentState();
 
       // 初始渲染
       renderMarkdown();
@@ -603,6 +769,8 @@ const app = createApp({
       currentStyle,
       starredStyles,
       currentCodeTheme,
+      documents,
+      activeDocumentId,
       previewMode,
       isDraggingOver,
       copySuccess,
@@ -639,8 +807,11 @@ const app = createApp({
       handleKeydown,
       getStyleName,
       isRecommended,
+      getDocumentDisplayTitle: resolveDocumentDisplayTitle,
+      formatDateTime,
+      switchDocument,
       togglePanel: (name) => panelManager.toggle(name),
-      clearEditor: () => { markdownInput.value = ''; },
+      clearEditor: () => { createNewDocument('', getUntitledTitle()); },
     };
   }
 });

@@ -101,6 +101,8 @@ function applyInlineStyles(html, styleConfig, codeTheme) {
   });
 
   // 包裹容器
+  applyCodeThemeStyles(doc, codeTheme);
+
   const container = doc.createElement('div');
   container.setAttribute('style', style.container);
   container.innerHTML = doc.body.innerHTML;

@@ -120,7 +120,7 @@ export function createMarkdownEngine() {
     linkify: true,
     typographer: false,
     highlight: function (str, lang) {
-      const dots = '<div style="display: flex; align-items: center; gap: 6px; padding: 10px 12px; background: #2a2c33; border-bottom: 1px solid #1e1f24;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></span></div>';
+      const dots = '<div class="md-code-block-header" style="display: flex; align-items: center; gap: 6px; padding: 10px 12px;"><span style="width: 12px; height: 12px; border-radius: 50%; background: #ff5f56;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #ffbd2e;"></span><span style="width: 12px; height: 12px; border-radius: 50%; background: #27c93f;"></span></div>';
 
       let codeContent = '';
       if (lang && typeof window.hljs !== 'undefined') {
@@ -135,7 +135,7 @@ export function createMarkdownEngine() {
         codeContent = md.utils.escapeHtml(str);
       }
 
-      return `<div style="margin: 20px 0; border-radius: 8px; overflow: hidden; background: #383a42; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${dots}<div style="padding: 16px; overflow-x: auto; background: #383a42;"><code style="display: block; color: #abb2bf; font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre;">${codeContent}</code></div></div>`;
+      return `<div class="md-code-block" data-code-block="true" style="margin: 20px 0; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">${dots}<div class="md-code-block-body" style="padding: 16px; overflow-x: auto;"><code class="md-code-block-code" style="display: block; font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.6; white-space: pre;">${codeContent}</code></div></div>`;
     }
   });
 
