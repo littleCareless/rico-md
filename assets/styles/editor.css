@@ -1,0 +1,182 @@
+/*
+ * editor.css
+ * -----------
+ * Editor panel, textarea, preview panel, preview toolbar,
+ * preview container, empty state.
+ */
+
+/* ── Markdown Input Container ── */
+.markdown-input-container {
+  flex: 1;
+  overflow: hidden;
+  padding: var(--space-md);
+  background: var(--color-bg);
+}
+
+.markdown-input {
+  width: 100%;
+  height: 100%;
+  padding: var(--space-md);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 14px;
+  line-height: 1.7;
+  resize: none;
+  background: var(--color-surface);
+  color: var(--color-primary);
+  transition: border-color var(--transition-fast);
+}
+
+.markdown-input:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.08);
+}
+
+.markdown-input.drag-over {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+}
+
+.markdown-input::placeholder {
+  color: var(--color-tertiary);
+  font-size: 13px;
+}
+
+/* ── Preview Toolbar ── */
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px var(--space-md);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  flex-shrink: 0;
+}
+
+/* ── Device Toggle ── */
+.device-toggle {
+  display: flex;
+  gap: 0;
+  background: var(--color-bg);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  border: 1px solid var(--color-light-border);
+}
+
+.device-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 26px;
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--color-tertiary);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.device-toggle-btn svg { width: 14px; height: 14px; }
+.device-toggle-btn:hover { color: var(--color-primary); }
+
+.device-toggle-btn.active {
+  background: var(--color-surface);
+  color: var(--color-accent);
+  box-shadow: var(--shadow-sm);
+}
+
+/* ── Copy Button ── */
+.copy-btn {
+  padding: 6px 18px;
+  background: var(--color-accent);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.copy-btn:hover { background: #0052CC; }
+.copy-btn:disabled { background: var(--color-border); cursor: not-allowed; }
+.copy-btn.success { background: #00C853; }
+
+.copy-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.twitter-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: #000;
+}
+
+.twitter-btn:hover { background: #333; }
+.twitter-btn:disabled { background: var(--color-border); }
+
+/* ── Preview Content ── */
+.preview-content {
+  flex: 1;
+  overflow-y: auto;
+  padding:20px;
+  background: var(--color-bg);
+  position: relative;
+  min-height: 0;
+}
+
+.preview-container {
+  max-width: var(--preview-width-desktop);
+  margin: 0 auto;
+  padding: 24px 32px 48px;
+  background: var(--color-surface);
+  min-height: 100%;
+}
+
+.preview-container.mobile-mode {
+  max-width: var(--preview-width-mobile);
+  border-left: 1px solid var(--color-light-border);
+  border-right: 1px solid var(--color-light-border);
+}
+
+/* ── Empty State ── */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: var(--space-xl);
+  color: var(--color-tertiary);
+}
+
+.empty-state-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: var(--space-md);
+  opacity: 0.25;
+}
+
+.empty-state h3 {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-secondary);
+  margin-bottom: var(--space-xs);
+}
+
+.empty-state p {
+  font-size: 12px;
+  color: var(--color-tertiary);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .markdown-input-container { padding: var(--space-sm); }
+  .markdown-input { font-size: 13px; padding: var(--space-sm); }
+  .preview-container { padding: 16px; }
+}
