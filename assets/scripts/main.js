@@ -36,6 +36,7 @@ const copySuccess = ref(false);
 const activePanel = ref(null);
 const toastState = ref({ show: false, message: '', type: 'success' });
 const sidebarOpen = ref(false);
+const deleteConfirm = ref({ show: false, docId: null, docTitle: '' });
 
 const wordCount = ref(0);
 const charCount = ref(0);
@@ -372,24 +373,64 @@ function duplicateDocument(documentId) {
 }
 
 function deleteDocument(documentId) {
-  if (documents.value.length <= 1) {
-    toast.show('至少保留一个文档', 'error');
+  const target = documents.value.find((doc) => doc.id === documentId);
+  if (!target) return;
+
+  deleteConfirm.value = {
+    show: true,
+    docId: documentId,
+    docTitle: resolveDocumentDisplayTitle(target)
+  };
+}
+
+function showDeleteConfirm(doc) {
+  if (!doc?.id) return;
+  const target = documents.value.find((item) => item.id === doc.id);
+  if (!target) return;
+
+  deleteConfirm.value = {
+    show: true,
+    docId: target.id,
+    docTitle: resolveDocumentDisplayTitle(target)
+  };
+}
+
+function cancelDelete() {
+  deleteConfirm.value = { show: false, docId: null, docTitle: '' };
+}
+
+function confirmDelete() {
+  const docId = deleteConfirm.value.docId;
+  if (!docId) {
+    cancelDelete();
     return;
   }
 
-  const target = documents.value.find((doc) => doc.id === documentId);
-  if (!target) return;
-  if (!window.confirm(`确定删除“${resolveDocumentDisplayTitle(target)}”吗？`)) return;
-
   const sorted = filteredDocuments.value;
-  const currentIndex = sorted.findIndex((doc) => doc.id === documentId);
-  const nextCandidate = sorted[currentIndex + 1] || sorted[currentIndex - 1] || documents.value.find((doc) => doc.id !== documentId);
+  const currentIndex = sorted.findIndex((doc) => doc.id === docId);
+  const nextCandidate = sorted[currentIndex + 1] || sorted[currentIndex - 1] || documents.value.find((doc) => doc.id !== docId);
 
-  documents.value = documents.value.filter((doc) => doc.id !== documentId);
+  documents.value = documents.value.filter((doc) => doc.id !== docId);
+
+  if (documents.value.length === 0) {
+    const fallbackDoc = buildDocument({
+      title: getUntitledTitle([]),
+      manualTitle: '',
+      content: '',
+      sortOrder: 0
+    });
+    documents.value = [fallbackDoc];
+    activeDocumentId.value = fallbackDoc.id;
+  } else {
+    activeDocumentId.value = nextCandidate?.id || activeDocumentId.value;
+    ensureActiveDocument();
+  }
+
   sortDocumentsByCurrentOrder();
-  activeDocumentId.value = nextCandidate?.id || documents.value[0]?.id || null;
   syncEditorFromActiveDocument();
   persistDocumentState();
+
+  cancelDelete();
 }
 
 function moveDocument(documentId, direction) {
@@ -991,6 +1032,7 @@ const app = createApp({
       activePanel,
       toastState,
       sidebarOpen,
+      deleteConfirm,
       wordCount,
       charCount,
       readTime,
@@ -1037,6 +1079,9 @@ const app = createApp({
       duplicateDocument,
       deleteDocument,
       moveDocument,
+      showDeleteConfirm,
+      cancelDelete,
+      confirmDelete,
       handlePreviewClick,
       getSaveStateLabel,
       getSaveStateClass,
