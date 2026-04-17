@@ -3,44 +3,107 @@
  * --------
  * Foundation: CSS variables, resets, layout, header, sidebar,
  * status bar, toast, scrollbar, responsive.
+ * 
+ * Design Tokens from reflct.co DESIGN.md
  */
 
 :root {
-  /* Colors */
-  --color-primary: #1a1a1a;
-  --color-secondary: #555;
-  --color-tertiary: #999;
-  --color-accent: #0066FF;
-  --color-bg: #F5F5F6;
-  --color-surface: #FFF;
-  --color-border: #E5E5E5;
-  --color-light-border: #F0F0F0;
+  /* ── Colors ── */
+  --color-text-primary: #1a1a1a;
+  --color-text-secondary: #4b5563;
+  --color-text-tertiary: #a3a3a3;
+  --color-text-inverse: #eae8e3;
+  --color-surface-base: #000000;
+  --color-surface-muted: #ffffff;
+  --color-surface-raised: #f5f2ee;
+  --color-surface-strong: #4a7c59;
+  --color-border-default: #e5e7eb;
+  --color-border-strong: #121212;
 
-  /* Spacing */
+  /* Legacy aliases (for compatibility) */
+  --color-primary: #1a1a1a;
+  --color-secondary: #4b5563;
+  --color-tertiary: #a3a3a3;
+  --color-accent: #4a7c59;
+  --color-accent-hover: #3d6348;
+  --color-accent-light: rgba(74, 124, 89, 0.08);
+  --color-bg: #f5f2ee;
+  --color-surface: #ffffff;
+  --color-border: #e5e7eb;
+  --color-border-light: #f0f0f0;
+
+  /* ── Typography ── */
+  --font-size-xs: 10px;
+  --font-size-sm: 12px;
+  --font-size-md: 14px;
+  --font-size-lg: 15px;
+  --font-size-xl: 16px;
+  --font-size-2xl: 18px;
+  --font-size-3xl: 19px;
+  --font-size-4xl: 20px;
+
+  /* ── Spacing ── */
+  --space-1: 4px;
+  --space-2: 6px;
+  --space-3: 8px;
+  --space-4: 10px;
+  --space-5: 12px;
+  --space-6: 16px;
+  --space-7: 20px;
+  --space-8: 24px;
+
+  /* Legacy spacing aliases */
   --space-xs: 4px;
   --space-sm: 8px;
   --space-md: 16px;
   --space-lg: 24px;
   --space-xl: 32px;
 
-  /* Typography */
-  --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "SF Mono", Monaco, "Cascadia Code", "Consolas", monospace;
+  /* ── Radius ── */
+  --radius-xs: 16px;
+  --radius-sm: 20px;
+  --radius-md: 24px;
+  --radius-lg: 32px;
+  --radius-xl: 40px;
+  --radius-2xl: 9999px;
 
-  /* Layout */
+  /* Legacy radius aliases */
+  --radius-sm: 5px;
+  --radius-md: 8px;
+
+  /* ── Shadows ── */
+  --shadow-1: 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+  --shadow-2: 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 10px 15px -3px, rgba(0, 0, 0, 0.1) 0px 4px 6px -4px;
+  --shadow-3: 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.1) 0px 4px 6px -1px, rgba(0, 0, 0, 0.1) 0px 2px 4px -2px;
+  --shadow-4: 0px 0px 0px 0px, rgba(0, 0, 0, 0) 0px 0px 0px 0px, rgba(0, 0, 0, 0.16) 0px 30px 70px -24px;
+
+  /* Legacy shadow aliases */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.08);
+  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+
+  /* ── Motion ── */
+  --motion-instant: 150ms;
+  --motion-fast: 200ms;
+  --motion-normal: 300ms;
+  --motion-slow: 500ms;
+  --motion-slower: 700ms;
+
+  /* Legacy transition aliases */
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+
+  /* ── Layout ── */
   --header-height: 46px;
   --status-bar-height: 26px;
   --sidebar-width: 280px;
   --side-panel-width: 380px;
 
-  /* UI */
-  --radius-sm: 5px;
-  --radius-md: 8px;
-  --shadow-sm: 0 1px 2px rgba(0,0,0,.05);
-  --shadow-md: 0 2px 8px rgba(0,0,0,.08);
-  --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
-  --transition-fast: 150ms ease;
-  --transition-normal: 250ms ease;
+  /* ── Fonts ── */
+  --font-sans: -apple-system, "Noto Sans SC", BlinkMacSystemFont, "SF Pro Display", "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "SF Mono", "Menlo", "Monaco", "Cascadia Code", "Consolas", monospace;
+
+  /* ── Preview ── */
   --preview-width-mobile: 375px;
   --preview-width-desktop: 720px;
 }
@@ -50,11 +113,12 @@
 
 body {
   font-family: var(--font-sans);
-  font-size: 14px;
+  font-size: var(--font-size-md);
   line-height: 1.5;
-  color: var(--color-primary);
-  background: var(--color-bg);
+  color: var(--color-text-primary);
+  background: var(--color-surface-raised);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
 }
 
@@ -169,7 +233,7 @@ body {
 
 .header-nav-btn svg { width: 14px; height: 14px; flex-shrink: 0; }
 .header-nav-btn:hover { color: var(--color-primary); background: var(--color-bg); transform: translateY(-1px); }
-.header-nav-btn.active { color: var(--color-accent); background: rgba(0,102,255,.06); }
+.header-nav-btn.active { color: var(--color-accent); background: var(--color-accent-light); }
 .header-nav-btn:active { transform: translateY(0); }
 
 .header-divider {
@@ -179,9 +243,10 @@ body {
 }
 
 .creator-info {
-  font-size: 11px;
+  font-size: 14px;
   color: var(--color-tertiary);
   white-space: nowrap;
+  font-weight:500;
 }
 .creator-info a { color: var(--color-accent); text-decoration: none; }
 .creator-info a:hover { opacity: .7; }
@@ -454,7 +519,7 @@ body {
 }
 .sidebar-action-btn:hover { background: var(--color-bg); color: var(--color-primary); transform: translateY(-1px); }
 .sidebar-action-btn.primary { background: var(--color-accent); color: white; font-weight: 500; }
-.sidebar-action-btn.primary:hover { background: #0052CC; }
+.sidebar-action-btn.primary:hover { background: var(--color-accent-hover); }
 .sidebar-action-btn:active { transform: translateY(0); }
 .sidebar-action-btn svg { flex-shrink: 0; }
 
@@ -489,7 +554,7 @@ body {
   transition: all var(--transition-fast);
 }
 .sidebar-doc-item:hover { background: var(--color-bg); color: var(--color-primary); }
-.sidebar-doc-item.active { background: rgba(0,102,255,.06); color: var(--color-accent); font-weight: 500; }
+.sidebar-doc-item.active { background: var(--color-accent-light); color: var(--color-accent); font-weight: 500; }
 .sidebar-doc-item svg { flex-shrink: 0; margin-top: 2px; }
 
 .sidebar-doc-meta {
@@ -527,14 +592,16 @@ body {
 .sidebar-doc-time {
   font-size: 11px;
   line-height: 1.3;
-  color: var(--color-tertiary);
+  color: var(--color-text-tertiary);
+  opacity: 0.7;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sidebar-doc-item.active .sidebar-doc-time {
-  color: #4F79D6;
+  color: var(--color-accent);
+  opacity: 0.6;
 }
 
 .sidebar-doc-actions {
@@ -571,6 +638,10 @@ body {
 }
 
 .sidebar-icon-btn.danger {
+  color: var(--color-text-tertiary);
+}
+
+.sidebar-icon-btn.danger:hover {
   color: #D32F2F;
 }
 
@@ -634,6 +705,104 @@ body {
 
 .toast-fade-enter-active, .toast-fade-leave-active { transition: opacity .15s ease; }
 .toast-fade-enter-from, .toast-fade-leave-to { opacity: 0; }
+
+/* ── Modal ── */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.modal-content {
+  background: var(--color-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-4);
+  width: 90%;
+  max-width: 360px;
+  overflow: hidden;
+}
+
+.modal-header {
+  padding: var(--space-6);
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.modal-header h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+
+.modal-body {
+  padding: var(--space-6);
+}
+
+.modal-body p {
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.modal-warning {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-tertiary);
+}
+
+.modal-footer {
+  padding: var(--space-4) var(--space-6);
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-surface-raised);
+}
+
+.modal-btn {
+  padding: var(--space-2) var(--space-5);
+  font-size: var(--font-size-md);
+  font-weight: 500;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--motion-instant);
+  border: none;
+}
+
+.modal-btn-cancel {
+  background: var(--color-surface);
+  color: var(--color-text-secondary);
+  border: 1px solid var(--color-border-default);
+}
+
+.modal-btn-cancel:hover {
+  background: var(--color-surface-raised);
+  color: var(--color-text-primary);
+}
+
+.modal-btn-danger {
+  background: #D32F2F;
+  color: white;
+}
+
+.modal-btn-danger:hover {
+  background: #B71C1C;
+  transform: translateY(-1px);
+}
+
+.modal-fade-enter-active, .modal-fade-leave-active {
+  transition: opacity var(--motion-fast);
+}
+
+.modal-fade-enter-from, .modal-fade-leave-to {
+  opacity: 0;
+}
 
 /* ── Scrollbar ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }
