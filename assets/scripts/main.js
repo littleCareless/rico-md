@@ -884,9 +884,7 @@ function handlePreviewClick(event) {
 }
 
 function loadDefaultExample() {
-  return `![](https://images.unsplash.com/photo-1499951360447-b19be8fe80f5?w=1200&h=400&fit=crop)
-
-# 公众号 Markdown 编辑器
+  return `# 公众号 Markdown 编辑器
 
 欢迎使用这款专为**微信公众号**设计的 Markdown 编辑器。
 
@@ -894,7 +892,7 @@ function loadDefaultExample() {
 
 ### 1. 智能图片处理
 
-![](https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=800&h=500&fit=crop)
+![](https://assets.uiineed.com/public/417b95fd3e60c3fbe181dd32f99ffbec.webp)
 
 - 支持截图、浏览器、文件管理器等来源的图片粘贴
 - 自动压缩并本地持久化保存
@@ -902,11 +900,11 @@ function loadDefaultExample() {
 
 ### 2. 多图排版
 
-![](https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=600&h=400&fit=crop)
+![](https://assets.uiineed.com/public/955d2dd359b24822f6d56df4a5e5d81c.webp)
 
-![](https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=400&fit=crop)
+![](https://assets.uiineed.com/public/fa83e8f33ccf35e0a9186188b7fb01d6.webp)
 
-![](https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=600&h=400&fit=crop)
+![](https://assets.uiineed.com/public/34f30f548deb1351b0ac4fb9d681af25.webp)
 
 ### 3. 代码块示例
 
