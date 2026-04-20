@@ -30,9 +30,13 @@
 - 保留显式保存快捷键：`Ctrl/Cmd + S`。
 
 ### 4. 主题与代码面板
-- 内置多套公众号排版主题（当前 18 套）。
+- 内置多套公众号排版主题（当前 20 套），按风格分类：
+  - **简约主义**：默认、极简、科技、优雅简约、沉浸阅读、Jony Ive
+  - **技术阅读**：Anthropic、Wired、Medium 阅读、Apple 极简、AI Coder
+  - **传统质感**：纸纪、晚点深度、金融时报、墨线·报纸、杂志
+  - **设计灵感**：素白·留白、赭红·编辑、素灰·清水、赤陶·有机、墨蓝·卫报、朱红·日经、素墨·世界报
 - 代码面板支持独立代码主题（当前 16 套）。
-- 代码块显示设置已集中到“代码”面板：
+- 代码块显示设置已集中到"代码"面板：
   - 显示代码语言
   - 显示复制按钮
   - 显示 macOS 装饰
@@ -50,7 +54,7 @@
 - 支持导出 `.md` 与 `.html`。
 
 ### 7. About 页面
-- 顶部导航新增“关于”，跳转到独立页面 `about.html`。
+- 顶部导航新增"关于"，跳转到独立页面 `about.html`。
 - 页面包含作者介绍、标签、知识库链接与联系方式二维码展示。
 
 ## 技术栈
@@ -90,8 +94,6 @@ rico-md/
 ├── about.html
 ├── README.md
 ├── LICENSE
-├── AGENTS.md
-├── GEMINI.md
 ├── start.sh
 ├── assets/
 │   ├── images/
@@ -119,7 +121,6 @@ rico-md/
 │   │       ├── theme-manager.js
 │   │       └── toast.js
 │   └── styles/
-│       ├── about.css
 │       ├── base.css
 │       ├── editor.css
 │       ├── panel.css
@@ -127,14 +128,7 @@ rico-md/
 │           ├── index.js
 │           └── *.js（主题定义）
 └── docs/
-    ├── CHANGELOG.md
-    ├── CLAUDE.md
-    ├── CONTRIBUTING.md
-    ├── PRD.md
-    ├── PRD-2.md
-    ├── PROGRESS.md
-    └── DESIGN/
-        └── reflct-co-DESIGN.md
+    └── ...
 ```
 
 ## 兼容性说明
@@ -143,10 +137,6 @@ rico-md/
 - 需要现代浏览器支持：ES Modules、Clipboard API、Fetch、IndexedDB。
 - 针对公众号复制场景做了结构与样式兼容处理（如代码块与图片复制策略）。
 
-
-## 🤝 贡献指南
-
-欢迎提交 Issue 和 Pull Request！
 
 ### 如何贡献
 1. Fork 本仓库
@@ -158,31 +148,54 @@ rico-md/
 ### 添加新样式
 1. 在 `styles/themes/` 中添加新的主题配置文件
 2. 在 `styles/themes/index.js` 中注册主题
-3. 确保包含所有必需的元素样式
-4. 测试各种 Markdown 元素的渲染效果
+3. 在 `scripts/ui/theme-manager.js` 中将主题归入分类
+4. 确保包含所有必需的元素样式
+5. 测试各种 Markdown 元素的渲染效果
 
-## 👨‍💻 作者
+## 作者
 
 **Rico**
-- 🌐 个人网站：[https://ricoui.com](https://ricoui.com)
-- 💻 GitHub：[@ricocc](https://github.com/ricocc)
+- 个人网站：[https://ricoui.com](https://ricoui.com)
+- X（推特）：[@ricouii](https://x.com/ricouii)
+- GitHub：[@ricocc](https://github.com/ricocc)
 
-## 📄 开源协议
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/images/wx.jpg" width="320" alt="公众号：Rico的设计漫想"><br/>
+    </td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td align="center">
+      <img src="assets/images/wechat.png" width="160" alt="个人微信"><br>
+      <sub>个人微信</sub>
+    </td>
+    <td align="center">
+      <img src="assets/images/zanshangma.jpg" width="160" alt="打赏码"><br>
+      <sub>打赏支持</sub>
+    </td>
+  </tr>
+</table>
+
+## 开源协议
 
 本项目基于 [MIT License](LICENSE) 开源。
 
 你可以自由地：
-- ✅ 商业使用
-- ✅ 修改
-- ✅ 分发
-- ✅ 私有使用
+- 商业使用
+- 修改
+- 分发
+- 私有使用
 
-## 🙏 致谢
+## 致谢
 
 - 感谢原项目 [huasheng_editor](https://github.com/alchaincyf/huasheng_editor) 的作者花生
 
 
-## 📊 Star History
+## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=ricocc/rico-md&type=Date)](https://star-history.com/#ricocc/rico-md&Date)
 
@@ -191,5 +204,5 @@ rico-md/
 <div align="center">
   Made with ❤️ by <a href="https://ricoui.com">Rico</a>
   <br>
-  如果觉得有用，请给个 ⭐️ Star 支持一下！
+  如果觉得有用，请给个 ⭐ Star 支持一下！
 </div>
