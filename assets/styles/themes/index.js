@@ -24,6 +24,7 @@ import { theme as nikkei } from './nikkei.js';
 import { theme as lemonde } from './lemonde.js';
 import { theme as minimalism } from './minimalism.js';
 import { theme as wechatPaperpress } from './wechat-paperpress.js';
+import { theme as kamiPaper } from './kami-paper.js';
 
 /**
  * 所有主题样式配置
@@ -50,4 +51,5 @@ export const STYLES = {
   'lemonde': lemonde,
   'minimalism': minimalism,
   'wechat-paperpress': wechatPaperpress,
+  'kami-paper': kamiPaper,
 };
