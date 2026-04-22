@@ -51,17 +51,18 @@ function applyInlineStyles(html, styleConfig, codeTheme) {
   groupConsecutiveImages(doc);
 
   Object.keys(style).forEach((selector) => {
-    if (selector === 'pre' || selector === 'code' || selector === 'pre code') return;
+    if (selector === 'container' || selector === 'pre' || selector === 'code' || selector === 'pre code') return;
 
     const elements = doc.querySelectorAll(selector);
     elements.forEach((element) => {
       if (element.tagName === 'IMG' && element.closest('.image-grid')) return;
-      const currentStyle = element.getAttribute('style') || '';
-      element.setAttribute('style', `${currentStyle}; ${style[selector]}`);
+      appendStyleText(element, style[selector]);
     });
   });
 
-  applyCodeThemeStyles(doc, codeTheme);
+  applyInlineCodeStyles(doc, style);
+  applyStandalonePreStyles(doc, style);
+  applyCodeBlockStyles(doc, style, codeTheme);
 
   const container = doc.createElement('div');
   container.setAttribute('style', style.container);
@@ -69,33 +70,93 @@ function applyInlineStyles(html, styleConfig, codeTheme) {
   return container.outerHTML;
 }
 
-function applyCodeThemeStyles(doc, codeTheme) {
-  if (!codeTheme) return;
+function appendStyleText(element, styleText) {
+  if (!styleText) return;
+  const currentStyle = element.getAttribute('style') || '';
+  element.setAttribute('style', currentStyle ? `${currentStyle}; ${styleText}` : styleText);
+}
+
+function applyInlineCodeStyles(doc, style) {
+  if (!style.code) return;
+  const inlineCodes = doc.querySelectorAll('code:not(.md-code-block-code)');
+  inlineCodes.forEach((codeElement) => {
+    if (codeElement.closest('pre')) return;
+    appendStyleText(codeElement, style.code);
+  });
+}
+
+function applyStandalonePreStyles(doc, style) {
+  if (!style.pre) return;
+  const standalonePre = doc.querySelectorAll('pre:not(.md-code-block-pre)');
+  standalonePre.forEach((preElement) => {
+    appendStyleText(preElement, style.pre);
+  });
+}
+
+function applyCodeBlockStyles(doc, style, codeTheme) {
   const blocks = doc.querySelectorAll('[data-code-block="true"]');
+  if (blocks.length === 0) return;
+
+  const resolvedStyles = codeTheme
+    ? buildCodeThemeStyles(codeTheme)
+    : buildThemeCodeBlockStyles(style);
 
   blocks.forEach((block) => {
     const pre = block.querySelector('.md-code-block-pre');
     const code = block.querySelector('.md-code-block-code');
 
-    block.setAttribute(
-      'style',
-      'margin: 24px 0;'
-    );
+    block.setAttribute('style', resolvedStyles.block);
 
     if (pre) {
-      pre.setAttribute(
-        'style',
-        `margin: 0; padding: 16px; overflow-x: auto; background: ${codeTheme.bg}; border: 1px solid ${codeTheme.borderColor}; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12);`
-      );
+      pre.setAttribute('style', resolvedStyles.pre);
     }
 
     if (code) {
-      code.setAttribute(
-        'style',
-        `display: block; margin: 0; color: ${codeTheme.textColor}; font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.7; white-space: pre; tab-size: 2;`
-      );
+      code.setAttribute('style', resolvedStyles.code);
     }
   });
+}
+
+function buildCodeThemeStyles(codeTheme) {
+  return {
+    block: 'margin: 24px 0;',
+    pre: `margin: 0; padding: 16px; overflow-x: auto; background: ${codeTheme.bg}; border: 1px solid ${codeTheme.borderColor}; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12);`,
+    code: `display: block; margin: 0; background: transparent; color: ${codeTheme.textColor}; font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace; font-size: 14px; line-height: 1.7; white-space: pre; tab-size: 2;`
+  };
+}
+
+function buildThemeCodeBlockStyles(style) {
+  const preStyle = style.pre || '';
+  const cleanCodeStyle = sanitizeThemeCodeStyle(style.code || '');
+  const preTextColor = extractStyleValue(preStyle, 'color');
+  const codeHasColor = Boolean(extractStyleValue(cleanCodeStyle, 'color'));
+  const textColorFallback = preTextColor && !codeHasColor ? `color: ${preTextColor};` : '';
+  const fontFamilyFallback = extractStyleValue(cleanCodeStyle, 'font-family')
+    ? ''
+    : "font-family: 'SF Mono', Monaco, 'Cascadia Code', Consolas, monospace;";
+  const fontSizeFallback = extractStyleValue(cleanCodeStyle, 'font-size') ? '' : 'font-size: 14px;';
+  const lineHeightFallback = extractStyleValue(cleanCodeStyle, 'line-height') ? '' : 'line-height: 1.7;';
+
+  return {
+    block: 'margin: 24px 0;',
+    pre: `margin: 0; padding: 16px; overflow-x: auto; ${preStyle}`,
+    code: `display: block; margin: 0; background: transparent; white-space: pre; tab-size: 2; ${fontFamilyFallback} ${fontSizeFallback} ${lineHeightFallback} ${textColorFallback} ${cleanCodeStyle}`
+  };
+}
+
+function sanitizeThemeCodeStyle(styleText) {
+  if (!styleText) return '';
+  return styleText.replace(
+    /(^|;)\s*(padding(?:-[^:]+)?|background(?:-color)?|border(?:-[^:]+)?|border-radius|display|white-space)\s*:\s*[^;]+;?/gi,
+    ';'
+  );
+}
+
+function extractStyleValue(styleText, property) {
+  if (!styleText || !property) return null;
+  const escapedProperty = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = styleText.match(new RegExp(`${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
+  return match ? match[1].trim() : null;
 }
 
 function groupConsecutiveImages(doc) {

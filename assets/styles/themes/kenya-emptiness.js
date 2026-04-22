@@ -23,7 +23,7 @@ export const theme = {
     "li": "margin: 8px 0; line-height: 2.2 !important; color: #777 !important;",
     "blockquote": "margin: 20px auto; padding: 0; background-color: transparent !important; border: none; color: #aaa !important; font-size: 13.5px; line-height: 2 !important; text-align: center; max-width: 420px; letter-spacing: 0.15em;",
     "code": "font-family: \"SF Mono\", Menlo, monospace; font-size: 12.5px; padding: 3px 7px; background-color: #f0f0f0 !important; color: #888 !important; border-radius: 2px;",
-    "pre": "margin: 24px 0; padding: 24px; background-color: #f5f5f5 !important; border: none; border-radius: 0; overflow-x: auto; line-height: 1.8 !important; font-size: 12.5px; color: #888 !important;",
+    "pre": "margin: 24px 0; padding: 24px; background-color: #f0f0f0 !important; border: none; border-radius: 0; overflow-x: auto; line-height: 1.8 !important; font-size: 12.5px; color: #888 !important;",
     "hr": "margin: 40px auto; border: none; width: 36px; height: 1px; background-color: #ddd !important;",
     "img": "max-width: 100%; max-height: 480px !important; height: auto; display: block; margin: 32px auto;",
     "table": "width: 100%; margin: 24px 0; border-collapse: collapse; font-size: 13px;",

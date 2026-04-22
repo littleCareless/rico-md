@@ -22,7 +22,7 @@ export const theme = {
     "li": "margin: 12px 0; line-height: 1.8 !important; color: #1a1a1a !important;",
     "blockquote": "margin: 24px 0; padding: 14px 20px; background-color: #f5f5f5 !important; border-left: 4px solid #db5e5e; color: #1a1a1a !important; font-size: 16px; line-height: 1.6 !important; position: relative; border-radius: 4px;",
     "code": "font-family: \"SF Mono\", Menlo, Consolas, monospace; font-size: 15px; padding: 3px 8px; background-color: #f5f5f5 !important; color: #db5e5e !important; border-radius: 4px; font-weight: 500;",
-    "pre": "margin: 28px 0; padding: 20px; background-color: #2a2a2a !important; color: #f5f5f5 !important; border-radius: 6px; overflow-x: auto; line-height: 1.6 !important; border-left: 4px solid #db5e5e;",
+    "pre": "margin: 28px 0; padding: 20px; background-color: #f5f5f5 !important; color: #db5e5e !important; border-radius: 6px; overflow-x: auto; line-height: 1.6 !important; border-left: 4px solid #db5e5e;",
     "hr": "margin: 40px auto; border: none; height: 2px; background: linear-gradient(to right, transparent, #db5e5e, transparent); max-width: 200px;",
     "img": "max-width: 100%; max-height: 600px !important; height: auto; display: block; margin: 32px auto; border-radius: 6px; border: 2px solid #db5e5e; box-shadow: 0 4px 12px rgba(211, 47, 47, 0.12);",
     "table": "width: 100%; margin: 28px 0; border-collapse: collapse; font-size: 16px; border-radius: 6px; overflow: hidden;",

@@ -24,7 +24,7 @@ export const theme = {
     "li": "margin: 3px 0; line-height: 1.72 !important; color: #121212 !important;",
     "blockquote": "margin: 0 0 12px; padding: 12px 16px; background-color: #FEC200 !important; border-left: 3px solid #C70000; color: #052962 !important; font-size: 14.5px; line-height: 1.6 !important; font-weight: 500;",
     "code": "font-family: \"SF Mono\", Consolas, monospace; font-size: 13px; padding: 2px 5px; background-color: #f6f6f6 !important; color: #C70000 !important; border-radius: 2px;",
-    "pre": "margin: 12px 0; padding: 16px; background-color: #052962 !important; color: #fff !important; border-radius: 4px; overflow-x: auto; line-height: 1.5 !important; font-size: 12.5px;",
+    "pre": "margin: 12px 0; padding: 16px;background-color: #f6f6f6 !important; color: #052962 !important; border-radius: 4px; overflow-x: auto; line-height: 1.5 !important; font-size: 12.5px;",
     "hr": "margin: 24px 0; border: none; height: 2px; background-color: #052962 !important;",
     "img": "max-width: 100%; max-height: 560px !important; height: auto; display: block; margin: 16px auto;",
     "table": "width: 100%; margin: 12px 0; border-collapse: collapse; font-size: 13.5px;",

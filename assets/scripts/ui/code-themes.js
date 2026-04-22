@@ -139,6 +139,8 @@ export const CODE_THEMES = {
 
 /** 默认代码主题 */
 export const DEFAULT_CODE_THEME = 'one-dark';
+/** 跟随正文主题 */
+export const FOLLOW_THEME_CODE_STYLE = 'follow-theme';
 
 /**
  * 获取代码主题配置
@@ -146,6 +148,26 @@ export const DEFAULT_CODE_THEME = 'one-dark';
  * @returns {Object} 主题配置
  */
 export function getCodeTheme(key) {
+  return CODE_THEMES[key] || null;
+}
+
+/**
+ * 当前选择是否为合法代码主题（含“跟随正文主题”）
+ * @param {string} key
+ * @returns {boolean}
+ */
+export function isCodeThemeSelection(key) {
+  if (!key) return false;
+  return key === FOLLOW_THEME_CODE_STYLE || Boolean(CODE_THEMES[key]);
+}
+
+/**
+ * 解析当前代码主题选择；跟随正文主题时返回 null
+ * @param {string} key
+ * @returns {Object|null}
+ */
+export function resolveCodeTheme(key) {
+  if (!key || key === FOLLOW_THEME_CODE_STYLE) return null;
   return CODE_THEMES[key] || CODE_THEMES[DEFAULT_CODE_THEME];
 }
 
@@ -154,9 +176,16 @@ export function getCodeTheme(key) {
  * @returns {Array<{key: string, name: string, description: string}>}
  */
 export function getCodeThemeList() {
-  return Object.entries(CODE_THEMES).map(([key, val]) => ({
-    key,
-    name: val.name,
-    description: val.description
-  }));
+  return [
+    {
+      key: FOLLOW_THEME_CODE_STYLE,
+      name: '跟随正文主题',
+      description: '默认：代码块随主题切换'
+    },
+    ...Object.entries(CODE_THEMES).map(([key, val]) => ({
+      key,
+      name: val.name,
+      description: val.description
+    }))
+  ];
 }

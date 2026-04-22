@@ -10,7 +10,12 @@ import { createTurndownService, createPasteHandler } from './core/paste-handler.
 import { renderPipeline } from './core/render-pipeline.js';
 import { copyToWechat } from './export/clipboard-exporter.js';
 import { getCategorizedThemes, getStyleName, isRecommended, getStarredStyles, toggleStarStyle } from './ui/theme-manager.js';
-import { getCodeTheme, getCodeThemeList, DEFAULT_CODE_THEME } from './ui/code-themes.js';
+import {
+  getCodeThemeList,
+  FOLLOW_THEME_CODE_STYLE,
+  isCodeThemeSelection,
+  resolveCodeTheme
+} from './ui/code-themes.js';
 import { createToast } from './ui/toast.js';
 import { createPanelManager } from './ui/panel-manager.js';
 import { loadPreferences, savePreferences, debounceSaveContent, getDefaultCodeBlockSettings } from './storage/preferences.js';
@@ -24,7 +29,7 @@ const markdownInput = ref('');
 const renderedContent = ref('');
 const currentStyle = ref('wechat-default');
 const starredStyles = ref([]);
-const currentCodeTheme = ref(DEFAULT_CODE_THEME);
+const currentCodeTheme = ref(FOLLOW_THEME_CODE_STYLE);
 const documents = ref([]);
 const activeDocumentId = ref(null);
 const currentDocumentTitle = ref('');
@@ -275,6 +280,10 @@ function updateStats() {
   readTime.value = Math.max(1, Math.ceil(total / 300));
 }
 
+function getResolvedCodeTheme() {
+  return resolveCodeTheme(currentCodeTheme.value);
+}
+
 async function renderMarkdown() {
   if (!markdownInput.value.trim()) {
     renderedContent.value = '';
@@ -291,7 +300,7 @@ async function renderMarkdown() {
       md,
       imageStore,
       styleConfig,
-      codeTheme: getCodeTheme(currentCodeTheme.value)
+      codeTheme: getResolvedCodeTheme()
     });
   } catch (error) {
     console.error('渲染失败:', error);
@@ -596,7 +605,7 @@ async function doCopy() {
     styleConfig,
     imageStore,
     showToast: (message, type) => toast.show(message, type),
-    codeTheme: getCodeTheme(currentCodeTheme.value)
+    codeTheme: getResolvedCodeTheme()
   });
 
   if (success) {
@@ -630,6 +639,7 @@ function toggleStar(key) {
 }
 
 function selectCodeTheme(key) {
+  if (!isCodeThemeSelection(key)) return;
   currentCodeTheme.value = key;
   try {
     localStorage.setItem('currentCodeTheme', key);
@@ -1015,7 +1025,7 @@ const app = createApp({
 
       try {
         const savedCodeTheme = localStorage.getItem('currentCodeTheme');
-        if (savedCodeTheme && getCodeTheme(savedCodeTheme)) {
+        if (isCodeThemeSelection(savedCodeTheme)) {
           currentCodeTheme.value = savedCodeTheme;
         }
       } catch (_error) {
