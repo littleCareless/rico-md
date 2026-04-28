@@ -113,6 +113,7 @@ export function createMarkdownEngine() {
   });
 
   patchMarkdownScanner(md);
+  registerMathPlugin(md);
 
   md.renderer.rules.fence = (tokens, idx) => {
     const token = tokens[idx];
@@ -122,6 +123,23 @@ export function createMarkdownEngine() {
   };
 
   return md;
+}
+
+function registerMathPlugin(md) {
+  const texmath = window.texmath;
+  const katex = window.katex;
+
+  if (typeof texmath !== 'function' || !katex) return;
+
+  md.use(texmath, {
+    engine: katex,
+    delimiters: 'dollars',
+    katexOptions: {
+      throwOnError: false,
+      strict: 'ignore',
+      output: 'htmlAndMathml'
+    }
+  });
 }
 
 export function preprocessMarkdown(content) {
