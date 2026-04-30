@@ -23,7 +23,7 @@ export const theme = {
     "li": "margin: 4px 0; line-height: 1.82 !important; color: #2c2c2c !important;",
     "blockquote": "margin: 0 0 14px; padding: 14px 22px; background-color: transparent !important; border-left: none; color: #5a5a5a !important; font-size: 15px; line-height: 1.7 !important; font-style: italic; text-align: center; font-family: Georgia, serif;",
     "code": "font-family: \"Courier Prime\", \"Courier New\", monospace; font-size: 13px; padding: 2px 5px; background-color: #f2efe8 !important; color: #8b1a1a !important; border: 1px solid #e0dbd2; border-radius: 2px;",
-    "pre": "margin: 14px 0; padding: 18px; background-color: #2c2c2c !important; border-radius: 4px; overflow-x: auto; line-height: 1.55 !important; font-size: 12.5px; color: #e8e4dc !important;",
+    "pre": "margin: 14px 0; padding: 18px;background-color: #f2efe8 !important; color: #8b1a1a !important;border-radius: 4px; overflow-x: auto; line-height: 1.55 !important; font-size: 12.5px; ",
     "hr": "margin: 28px auto; border: none; height: 1px; background-color: #8b1a1a !important; max-width: 80px;",
     "img": "max-width: 100%; max-height: 560px !important; height: auto; display: block; margin: 18px auto; border: 1px solid #e0dbd2;",
     "table": "width: 100%; margin: 14px 0; border-collapse: collapse; font-size: 13.5px;",

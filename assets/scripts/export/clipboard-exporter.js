@@ -100,24 +100,87 @@ function convertSingleGridToTable(doc, grid, columns) {
   grid.parentNode.replaceChild(table, grid);
 }
 
-function convertCodeBlocks(doc, codeTheme) {
+function convertCodeBlocks(doc, styleConfig, codeTheme) {
   const blocks = doc.querySelectorAll('[data-code-block="true"]');
+  const resolvedStyles = resolveCodeBlockExportStyles(styleConfig, codeTheme);
 
   blocks.forEach((block) => {
     const code = block.querySelector('.md-code-block-code');
     if (!code) return;
 
-    const pre = doc.createElement('pre');
-    pre.setAttribute(
-      'style',
-      `margin: 24px 0; padding: 16px; background: ${codeTheme.bg}; color: ${codeTheme.textColor}; overflow-x: auto; white-space: pre; font-family: "SF Mono", Consolas, Monaco, "Courier New", monospace; font-size: 14px; line-height: 1.7; border: 1px solid ${codeTheme.borderColor}; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12);`
-    );
+    const wrapper = doc.createElement('section');
+    wrapper.setAttribute('style', resolvedStyles.wrapper);
 
     const codeNode = doc.createElement('code');
-    codeNode.textContent = code.textContent || '';
-    pre.appendChild(codeNode);
-    block.parentNode.replaceChild(pre, block);
+    codeNode.setAttribute('style', resolvedStyles.code);
+    codeNode.innerHTML = toWechatCodeHTML(code.textContent || '');
+
+    wrapper.appendChild(codeNode);
+    block.parentNode.replaceChild(wrapper, block);
   });
+}
+
+function resolveCodeBlockExportStyles(styleConfig, codeTheme) {
+  if (codeTheme) {
+    return {
+      wrapper: `margin: 24px 0 !important; padding: 16px !important; background: ${codeTheme.bg} !important; color: ${codeTheme.textColor} !important; overflow-x: auto !important; border: 1px solid ${codeTheme.borderColor} !important; border-radius: 10px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important; -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;`,
+      code: `display: block !important; background: transparent !important; color: ${codeTheme.textColor} !important; font-family: "SF Mono", Consolas, Monaco, "Courier New", monospace !important; font-size: 14px !important; line-height: 1.7 !important; white-space: normal !important; word-break: break-word !important; tab-size: 2 !important;`
+    };
+  }
+
+  const preStyle = styleConfig?.styles?.pre || '';
+  const cleanCodeStyle = sanitizeThemeCodeStyle(styleConfig?.styles?.code || '');
+  const preTextColor = extractStyleValue(preStyle, 'color');
+  const codeHasColor = Boolean(extractStyleValue(cleanCodeStyle, 'color'));
+  const textColorFallback = preTextColor && !codeHasColor ? `color: ${preTextColor} !important;` : '';
+  const fontFamilyFallback = extractStyleValue(cleanCodeStyle, 'font-family')
+    ? ''
+    : 'font-family: "SF Mono", Consolas, Monaco, "Courier New", monospace !important;';
+  const fontSizeFallback = extractStyleValue(cleanCodeStyle, 'font-size') ? '' : 'font-size: 14px !important;';
+  const lineHeightFallback = extractStyleValue(cleanCodeStyle, 'line-height') ? '' : 'line-height: 1.7 !important;';
+
+  return {
+    wrapper: `margin: 24px 0 !important; padding: 16px !important; overflow-x: auto !important; ${preStyle}`,
+    code: `display: block !important; background: transparent !important; white-space: normal !important; word-break: break-word !important; tab-size: 2 !important; ${fontFamilyFallback} ${fontSizeFallback} ${lineHeightFallback} ${textColorFallback} ${cleanCodeStyle}`
+  };
+}
+
+function sanitizeThemeCodeStyle(styleText) {
+  if (!styleText) return '';
+  return styleText.replace(
+    /(^|;)\s*(padding(?:-[^:]+)?|background(?:-color)?|border(?:-[^:]+)?|border-radius|display|white-space)\s*:\s*[^;]+;?/gi,
+    ';'
+  );
+}
+
+function extractStyleValue(styleText, property) {
+  if (!styleText || !property) return null;
+  const escapedProperty = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const match = styleText.match(new RegExp(`${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
+  return match ? match[1].trim() : null;
+}
+
+function escapeHtml(value) {
+  return (value || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function toWechatCodeHTML(codeText) {
+  const normalized = (codeText || '')
+    .replace(/\r\n/g, '\n')
+    .replace(/\r/g, '\n')
+    .replace(/\t/g, '  ');
+
+  if (!normalized) return '&nbsp;';
+
+  return escapeHtml(normalized)
+    .split('\n')
+    .map((line) => (line.length ? line.replace(/ /g, '&nbsp;') : '&nbsp;'))
+    .join('<br>');
 }
 
 function flattenListItems(doc) {
@@ -159,6 +222,25 @@ function wrapSectionIfNeeded(doc, styleConfig) {
   doc.body.appendChild(section);
 }
 
+function buildClipboardPlainText(doc) {
+  const clone = doc.body.cloneNode(true);
+
+  clone.querySelectorAll('br').forEach((br) => {
+    br.replaceWith('\n');
+  });
+
+  clone.querySelectorAll('p, div, section, pre, blockquote, li, h1, h2, h3, h4, h5, h6, tr').forEach((node) => {
+    if (!node.textContent?.endsWith('\n')) {
+      node.append('\n');
+    }
+  });
+
+  return (clone.textContent || '')
+    .replace(/[ \t]+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+
 export async function copyToWechat({ renderedHTML, styleConfig, imageStore, showToast, codeTheme }) {
   if (!renderedHTML) {
     showToast('没有内容可复制', 'error');
@@ -184,13 +266,13 @@ export async function copyToWechat({ renderedHTML, styleConfig, imageStore, show
       }));
     }
 
-    convertCodeBlocks(doc, codeTheme);
+    convertCodeBlocks(doc, styleConfig, codeTheme);
     flattenListItems(doc);
     normalizeBlockquotes(doc);
     wrapSectionIfNeeded(doc, styleConfig);
 
     const html = doc.body.innerHTML;
-    const text = doc.body.textContent || '';
+    const text = buildClipboardPlainText(doc);
 
     const item = new ClipboardItem({
       'text/html': new Blob([html], { type: 'text/html' }),

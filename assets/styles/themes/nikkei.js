@@ -24,7 +24,7 @@ export const theme = {
     "li": "margin: 3px 0; line-height: 1.78 !important; color: #1a1a1a !important;",
     "blockquote": "margin: 0 0 10px; padding: 10px 14px; background-color: transparent !important; border-left: 2px solid #C41230; border-right: 2px solid #C41230; color: #333 !important; font-size: 14px; line-height: 1.65 !important;",
     "code": "font-family: \"Courier New\", monospace; font-size: 13px; padding: 2px 4px; background-color: #f5f5f5 !important; color: #C41230 !important; border-radius: 2px;",
-    "pre": "margin: 10px 0; padding: 14px; background-color: #1a1a1a !important; border-radius: 3px; overflow-x: auto; line-height: 1.5 !important; font-size: 12.5px; color: #e8e8e8 !important;",
+    "pre": "margin: 10px 0; padding: 14px; background-color: #f5f5f5 !important; border-radius: 3px; overflow-x: auto; line-height: 1.5 !important; font-size: 12.5px; color: #C41230 !important;",
     "hr": "margin: 20px 0; border: none; height: 1px; background-color: #000 !important;",
     "img": "max-width: 100%; max-height: 480px !important; height: auto; display: block; margin: 14px auto;",
     "table": "width: 100%; margin: 10px 0; border-collapse: collapse; font-size: 13px; border-top: 2px solid #000;",
