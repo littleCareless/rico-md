@@ -9,7 +9,7 @@
 
 ## 在线地址
 
-- https://md.uiineed.com
+- [https://md.ricoui.com](https://md.ricoui.com/)
 
 ## 核心能力
 
