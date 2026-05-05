@@ -21,7 +21,7 @@ export const theme = {
     "ol": "margin: 24px 0; padding-left: 24px;",
     "li": "margin: 8px 0; line-height: 1.8 !important;",
     "blockquote": "margin: 20px 0; padding: 2px 16px; background-color: #fafafa !important;  background-color: #e9f3fd !important;border-left: 3px solid #7fb1d3; line-height: 1.5 !important;",
-    "code": "font-family: Consolas, Monaco, \"Courier New\", monospace; font-size: 13px; padding: 2px 6px; background-color: #f5f5f5 !important; color: #e74c3c !important; border-radius: 3px;",
+    "code": "font-family: Consolas, Monaco, \"Courier New\", monospace; font-size: 13px; padding: 2px 6px; background-color: #f5f5f5 !important; color: #1B365D !important; border-radius: 3px;",
     "pre": "margin: 24px 0; padding: 16px;background-color: #f5f5f5 !important; font-size: 13px; border-radius: 8px; overflow-x: auto; line-height: 1.6 !important;",
     "hr": "margin: 48px 0; border: none; border-top: 1px solid #e0e0e0;",
     "img": "max-width: 100%; max-height: 600px !important; height: auto; display: block; margin: 24px auto 32px; border-radius: 8px;",

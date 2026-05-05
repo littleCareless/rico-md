@@ -10,13 +10,16 @@ function clamp(value, min, max) {
 function normalizeHex(hex) {
   const value = String(hex || '').trim();
   if (!value.startsWith('#')) return null;
+
   const raw = value.slice(1);
   if (raw.length === 3) {
     return `#${raw.split('').map((char) => char + char).join('')}`;
   }
+
   if (raw.length === 6) {
     return `#${raw}`;
   }
+
   return null;
 }
 
@@ -55,6 +58,7 @@ function rgbToHex({ r, g, b }) {
 function mixColors(colorA, colorB, ratio = 0.5) {
   const parsedA = parseColor(colorA);
   const parsedB = parseColor(colorB);
+
   if (!parsedA && !parsedB) return colorA || colorB || '#666666';
   if (!parsedA) return rgbToHex(parsedB);
   if (!parsedB) return rgbToHex(parsedA);
@@ -89,16 +93,40 @@ function isDarkColor(color) {
   return getRelativeLuminance(color) < 0.45;
 }
 
+function getContrastRatio(colorA, colorB) {
+  const luminanceA = getRelativeLuminance(colorA);
+  const luminanceB = getRelativeLuminance(colorB);
+  const lighter = Math.max(luminanceA, luminanceB);
+  const darker = Math.min(luminanceA, luminanceB);
+  return (lighter + 0.05) / (darker + 0.05);
+}
+
+function ensureReadableColor(color, bg, fallback, minContrast = 3) {
+  if (!color) return fallback;
+  if (getContrastRatio(color, bg) >= minContrast) return color;
+  if (fallback && getContrastRatio(fallback, bg) >= minContrast) return fallback;
+
+  const darkMode = isDarkColor(bg);
+  const anchor = darkMode ? '#f3f4f6' : '#1f2937';
+  const base = fallback || color;
+  const firstAttempt = mixColors(base, anchor, 0.72);
+  if (getContrastRatio(firstAttempt, bg) >= minContrast) return firstAttempt;
+
+  const secondAttempt = mixColors(anchor, base, 0.78);
+  if (getContrastRatio(secondAttempt, bg) >= minContrast) return secondAttempt;
+
+  return anchor;
+}
+
 function extractStyleValue(styleText, property) {
   if (!styleText || !property) return null;
   const escaped = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = String(styleText).match(new RegExp(`${escaped}\\s*:\\s*([^;]+)`, 'i'));
+  const match = String(styleText).match(new RegExp(`(?:^|;)\\s*${escaped}\\s*:\\s*([^;]+)`, 'i'));
   return match ? match[1].trim() : null;
 }
 
 function extractColorToken(value) {
   if (!value) return null;
-
   const colorMatch = String(value).match(/(#[0-9a-fA-F]{3,6}|rgba?\([^)]+\))/);
   return colorMatch ? colorMatch[1] : null;
 }
@@ -145,7 +173,10 @@ function buildTokenPalette({
     class: type,
     regexp: tertiary,
     subst: textColor,
-    params: textColor
+    params: mixColors(textColor, secondary, 0.72),
+    tag: primary,
+    selector: primary,
+    link: secondary
   };
 }
 
@@ -166,6 +197,20 @@ function createCodeTheme({
   punctuation,
   meta
 }) {
+  const tokens = buildTokenPalette({
+    textColor,
+    bg,
+    primary,
+    secondary,
+    tertiary,
+    quaternary,
+    number,
+    comment,
+    type,
+    punctuation,
+    meta
+  });
+
   return {
     name,
     description,
@@ -173,26 +218,36 @@ function createCodeTheme({
     headerBg,
     textColor,
     borderColor,
-    tokens: buildTokenPalette({
-      textColor,
-      bg,
-      primary,
-      secondary,
-      tertiary,
-      quaternary,
-      number,
-      comment,
-      type,
-      punctuation,
-      meta
-    })
+    tokens,
+    syntaxHighlight: tokens
   };
 }
+
+const PREVIEW_TOKENS = [
+  [
+    { text: 'function', token: 'keyword' },
+    { text: ' ', token: null },
+    { text: 'hello', token: 'function' },
+    { text: '()', token: 'punctuation' },
+    { text: ' ', token: null },
+    { text: '{', token: 'punctuation' }
+  ],
+  [
+    { text: '  ', token: null },
+    { text: 'return', token: 'keyword' },
+    { text: ' ', token: null },
+    { text: '"world"', token: 'string' },
+    { text: ';', token: 'punctuation' }
+  ],
+  [
+    { text: '}', token: 'punctuation' }
+  ]
+];
 
 export const CODE_THEMES = {
   'github-light': createCodeTheme({
     name: 'GitHub Light',
-    description: '浅色经典风格',
+    description: 'Classic light theme',
     bg: '#f6f8fa',
     headerBg: '#e8ecf0',
     textColor: '#24292e',
@@ -207,7 +262,7 @@ export const CODE_THEMES = {
   }),
   'github-dark': createCodeTheme({
     name: 'GitHub Dark',
-    description: 'GitHub 深色模式',
+    description: 'GitHub dark mode',
     bg: '#0d1117',
     headerBg: '#010409',
     textColor: '#c9d1d9',
@@ -222,7 +277,7 @@ export const CODE_THEMES = {
   }),
   'one-dark': createCodeTheme({
     name: 'One Dark',
-    description: 'VS Code 深色风格',
+    description: 'VS Code inspired',
     bg: '#282c34',
     headerBg: '#21252b',
     textColor: '#abb2bf',
@@ -237,7 +292,7 @@ export const CODE_THEMES = {
   }),
   monokai: createCodeTheme({
     name: 'Monokai',
-    description: '经典编辑器深色',
+    description: 'Classic editor theme',
     bg: '#272822',
     headerBg: '#1e1f1c',
     textColor: '#f8f8f2',
@@ -252,7 +307,7 @@ export const CODE_THEMES = {
   }),
   dracula: createCodeTheme({
     name: 'Dracula',
-    description: '紫色调深色主题',
+    description: 'Purple-leaning dark theme',
     bg: '#282a36',
     headerBg: '#21222c',
     textColor: '#f8f8f2',
@@ -267,7 +322,7 @@ export const CODE_THEMES = {
   }),
   'solarized-light': createCodeTheme({
     name: 'Solarized Light',
-    description: '护眼暖色调',
+    description: 'Warm light theme',
     bg: '#fdf6e3',
     headerBg: '#eee8d5',
     textColor: '#586e75',
@@ -282,7 +337,7 @@ export const CODE_THEMES = {
   }),
   'solarized-dark': createCodeTheme({
     name: 'Solarized Dark',
-    description: 'Solarized 深色版',
+    description: 'Solarized dark mode',
     bg: '#002b36',
     headerBg: '#001f27',
     textColor: '#93a1a1',
@@ -297,7 +352,7 @@ export const CODE_THEMES = {
   }),
   'night-owl': createCodeTheme({
     name: 'Night Owl',
-    description: '高对比度深色',
+    description: 'High-contrast dark theme',
     bg: '#011627',
     headerBg: '#01101d',
     textColor: '#d6deeb',
@@ -312,7 +367,7 @@ export const CODE_THEMES = {
   }),
   nord: createCodeTheme({
     name: 'Nord',
-    description: '北极蓝调主题',
+    description: 'Arctic blue palette',
     bg: '#2e3440',
     headerBg: '#242933',
     textColor: '#d8dee9',
@@ -325,9 +380,9 @@ export const CODE_THEMES = {
     comment: '#616e88',
     type: '#ebcb8b'
   }),
-  ' Gruvbox Light': createCodeTheme({
+  'gruvbox-light': createCodeTheme({
     name: 'Gruvbox Light',
-    description: '复古暖色调',
+    description: 'Retro warm light theme',
     bg: '#fbf1c7',
     headerBg: '#ebdbb2',
     textColor: '#3c3836',
@@ -342,7 +397,7 @@ export const CODE_THEMES = {
   }),
   'gruvbox-dark': createCodeTheme({
     name: 'Gruvbox Dark',
-    description: '复古深色调',
+    description: 'Retro warm dark theme',
     bg: '#282828',
     headerBg: '#1d2021',
     textColor: '#ebdbb2',
@@ -357,7 +412,7 @@ export const CODE_THEMES = {
   }),
   'catppuccin-mocha': createCodeTheme({
     name: 'Catppuccin Mocha',
-    description: '柔和深色主题',
+    description: 'Soft pastel dark theme',
     bg: '#1e1e2e',
     headerBg: '#181825',
     textColor: '#cdd6f4',
@@ -372,7 +427,7 @@ export const CODE_THEMES = {
   }),
   'catppuccin-latte': createCodeTheme({
     name: 'Catppuccin Latte',
-    description: '柔和浅色主题',
+    description: 'Soft pastel light theme',
     bg: '#eff1f5',
     headerBg: '#e6e9ef',
     textColor: '#4c4f69',
@@ -387,7 +442,7 @@ export const CODE_THEMES = {
   }),
   'tokyo-night': createCodeTheme({
     name: 'Tokyo Night',
-    description: '东京夜景风格',
+    description: 'Neon city dark theme',
     bg: '#1a1b26',
     headerBg: '#16161e',
     textColor: '#c0caf5',
@@ -402,7 +457,7 @@ export const CODE_THEMES = {
   }),
   oxocarbon: createCodeTheme({
     name: 'Oxocarbon',
-    description: 'IBM 碳黑风格',
+    description: 'Carbon-inspired theme',
     bg: '#262626',
     headerBg: '#1a1a1a',
     textColor: '#eeeeee',
@@ -417,7 +472,7 @@ export const CODE_THEMES = {
   }),
   'vitesse-dark': createCodeTheme({
     name: 'Vitesse Dark',
-    description: '极速深色主题',
+    description: 'Vitesse-inspired dark theme',
     bg: '#1a1b26',
     headerBg: '#16161e',
     textColor: '#c0caf5',
@@ -432,26 +487,65 @@ export const CODE_THEMES = {
   })
 };
 
+const LEGACY_THEME_ALIASES = {
+  ' Gruvbox Light': 'gruvbox-light'
+};
+
 export const DEFAULT_CODE_THEME = 'one-dark';
 export const FOLLOW_THEME_CODE_STYLE = 'follow-theme';
 
+function resolveThemeKey(key) {
+  if (!key) return null;
+  if (CODE_THEMES[key]) return key;
+  return LEGACY_THEME_ALIASES[key] || null;
+}
+
 export function getCodeTheme(key) {
-  return CODE_THEMES[key] || null;
+  const themeKey = resolveThemeKey(key);
+  return themeKey ? CODE_THEMES[themeKey] : null;
 }
 
 export function isCodeThemeSelection(key) {
   if (!key) return false;
-  return key === FOLLOW_THEME_CODE_STYLE || Boolean(CODE_THEMES[key]);
+  return key === FOLLOW_THEME_CODE_STYLE || Boolean(resolveThemeKey(key));
 }
 
 export function resolveCodeTheme(key) {
   if (!key || key === FOLLOW_THEME_CODE_STYLE) return null;
-  return CODE_THEMES[key] || CODE_THEMES[DEFAULT_CODE_THEME];
+  const themeKey = resolveThemeKey(key);
+  return themeKey ? CODE_THEMES[themeKey] : CODE_THEMES[DEFAULT_CODE_THEME];
 }
 
 export function getCodeHighlightTheme(codeTheme, styleConfig) {
-  if (codeTheme?.tokens) return codeTheme;
+  if (codeTheme?.tokens || codeTheme?.syntaxHighlight) {
+    return normalizeHighlightTheme(codeTheme);
+  }
+
   return deriveThemeAwareHighlightTheme(styleConfig);
+}
+
+function normalizeHighlightTheme(theme) {
+  const tokens = theme?.tokens || theme?.syntaxHighlight || {};
+  return {
+    ...theme,
+    tokens,
+    syntaxHighlight: tokens
+  };
+}
+
+function createCodeThemePreview(theme) {
+  const resolvedTheme = normalizeHighlightTheme(theme);
+  return {
+    bg: resolvedTheme.bg,
+    headerBg: resolvedTheme.headerBg || mixColors(resolvedTheme.bg, resolvedTheme.borderColor, 0.88),
+    textColor: resolvedTheme.textColor,
+    borderColor: resolvedTheme.borderColor,
+    tokens: resolvedTheme.tokens,
+    lines: PREVIEW_TOKENS.map((line) => line.map((segment) => ({
+      text: segment.text,
+      color: segment.token ? (resolvedTheme.tokens[segment.token] || resolvedTheme.textColor) : resolvedTheme.textColor
+    })))
+  };
 }
 
 function deriveThemeAwareHighlightTheme(styleConfig) {
@@ -497,41 +591,54 @@ function deriveThemeAwareHighlightTheme(styleConfig) {
   const type = mixColors(headingColor, darkMode ? '#ffa657' : '#953800', 0.34);
   const punctuation = mixColors(textColor, bg, darkMode ? 0.8 : 0.68);
   const meta = mixColors(accent, textColor, darkMode ? 0.7 : 0.58);
+  const baseTokens = buildTokenPalette({
+    textColor,
+    bg,
+    primary: accent,
+    secondary,
+    tertiary,
+    quaternary,
+    number,
+    comment,
+    type,
+    punctuation,
+    meta
+  });
+  const readableFallback = ensureReadableColor(accent, bg, textColor, 3.2);
+  const tokens = Object.fromEntries(
+    Object.entries(baseTokens).map(([token, color]) => {
+      const minContrast = token === 'comment' || token === 'punctuation' ? 2.4 : 3;
+      return [token, ensureReadableColor(color, bg, readableFallback, minContrast)];
+    })
+  );
 
   return {
-    name: 'Follow Theme',
-    description: 'Follow article theme',
+    name: '跟随主题风格',
+    description: '默认的文章样式风格',
     bg,
     headerBg: bg,
     textColor,
     borderColor,
-    tokens: buildTokenPalette({
-      textColor,
-      bg,
-      primary: accent,
-      secondary,
-      tertiary,
-      quaternary,
-      number,
-      comment,
-      type,
-      punctuation,
-      meta
-    })
+    tokens,
+    syntaxHighlight: tokens
   };
 }
 
 export function getCodeThemeList() {
+  const followPreviewTheme = normalizeHighlightTheme(CODE_THEMES[DEFAULT_CODE_THEME]);
+
   return [
     {
       key: FOLLOW_THEME_CODE_STYLE,
-      name: '跟随正文主题',
-      description: '默认：代码块随主题切换'
+      name: '跟随主题风格',
+      description: '默认的文章样式风格',
+      preview: createCodeThemePreview(followPreviewTheme)
     },
     ...Object.entries(CODE_THEMES).map(([key, value]) => ({
       key,
       name: value.name,
-      description: value.description
+      description: value.description,
+      preview: createCodeThemePreview(value)
     }))
   ];
 }

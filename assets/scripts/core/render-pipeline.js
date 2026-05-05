@@ -207,7 +207,7 @@ function sanitizeThemeCodeStyle(styleText) {
 function extractStyleValue(styleText, property) {
   if (!styleText || !property) return null;
   const escapedProperty = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = styleText.match(new RegExp(`${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
+  const match = styleText.match(new RegExp(`(?:^|;)\\s*${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
   return match ? match[1].trim() : null;
 }
 

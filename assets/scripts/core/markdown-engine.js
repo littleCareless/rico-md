@@ -85,22 +85,15 @@ function patchMarkdownScanner(md) {
 }
 
 function renderCodeBlock(str, lang, md) {
-  let codeContent = md.utils.escapeHtml(str);
+  const codeContent = md.utils.escapeHtml(str);
   const language = (lang || '').trim();
-
-  if (language && typeof window.hljs !== 'undefined') {
-    try {
-      if (window.hljs.getLanguage(language)) {
-        codeContent = window.hljs.highlight(str, { language }).value;
-      }
-    } catch (_error) {
-      codeContent = md.utils.escapeHtml(str);
-    }
-  }
+  const safeLanguage = md.utils.escapeHtml(language);
+  const codeClasses = ['md-code-block-code'];
+  if (language) codeClasses.push(`language-${safeLanguage}`);
 
   return `
-    <div class="md-code-block" data-code-block="true">
-      <pre class="md-code-block-pre"><code class="md-code-block-code">${codeContent}</code></pre>
+    <div class="md-code-block" data-code-block="true"${safeLanguage ? ` data-language="${safeLanguage}"` : ''}>
+      <pre class="md-code-block-pre"><code class="${codeClasses.join(' ')}"${safeLanguage ? ` data-language="${safeLanguage}"` : ''}>${codeContent}</code></pre>
     </div>
   `;
 }

@@ -114,11 +114,23 @@ function convertCodeBlocks(doc, styleConfig, codeTheme) {
     const wrapper = doc.createElement('section');
     wrapper.setAttribute('style', resolvedStyles.wrapper);
 
+    const frame = doc.createElement('section');
+    frame.setAttribute('style', resolvedStyles.frame);
+
+    const scrollArea = doc.createElement('section');
+    scrollArea.setAttribute('style', resolvedStyles.scrollArea);
+
+    const content = doc.createElement('span');
+    content.setAttribute('style', resolvedStyles.content);
+
     const codeNode = doc.createElement('code');
     codeNode.setAttribute('style', resolvedStyles.code);
     codeNode.innerHTML = serializeHighlightedCodeHtml(code);
 
-    wrapper.appendChild(codeNode);
+    content.appendChild(codeNode);
+    scrollArea.appendChild(content);
+    frame.appendChild(scrollArea);
+    wrapper.appendChild(frame);
     block.parentNode.replaceChild(wrapper, block);
   });
 }
@@ -126,8 +138,11 @@ function convertCodeBlocks(doc, styleConfig, codeTheme) {
 function resolveCodeBlockExportStyles(styleConfig, codeTheme) {
   if (codeTheme) {
     return {
-      wrapper: `margin: 24px 0 !important; padding: 16px !important; background: ${codeTheme.bg} !important; color: ${codeTheme.textColor} !important; overflow-x: auto !important; border: 1px solid ${codeTheme.borderColor} !important; border-radius: 10px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important; -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;`,
-      code: `display: block !important; background: transparent !important; color: ${codeTheme.textColor} !important; font-family: "SF Mono", Consolas, Monaco, "Courier New", monospace !important; font-size: 14px !important; line-height: 1.7 !important; white-space: normal !important; word-break: break-word !important; tab-size: 2 !important;`
+      wrapper: 'margin: 24px 0 !important;',
+      frame: `padding: 16px !important; background: ${codeTheme.bg} !important; color: ${codeTheme.textColor} !important; border: 1px solid ${codeTheme.borderColor} !important; border-radius: 10px !important; box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important; -webkit-box-shadow: 0 2px 8px rgba(0,0,0,0.12) !important;`,
+      scrollArea: 'display: block !important; overflow-x: auto !important; overflow-y: hidden !important; padding: 0 0 12px 0 !important; -webkit-overflow-scrolling: touch !important;',
+      content: 'display: inline-block !important; min-width: max-content !important;',
+      code: `display: block !important; background: transparent !important; color: ${codeTheme.textColor} !important; font-family: "SF Mono", Consolas, Monaco, "Courier New", monospace !important; font-size: 14px !important; line-height: 1.7 !important; white-space: pre !important; word-break: normal !important; overflow-wrap: normal !important; tab-size: 2 !important;`
     };
   }
 
@@ -143,8 +158,11 @@ function resolveCodeBlockExportStyles(styleConfig, codeTheme) {
   const lineHeightFallback = extractStyleValue(cleanCodeStyle, 'line-height') ? '' : 'line-height: 1.7 !important;';
 
   return {
-    wrapper: `margin: 24px 0 !important; padding: 16px !important; overflow-x: auto !important; ${preStyle}`,
-    code: `display: block !important; background: transparent !important; white-space: normal !important; word-break: break-word !important; tab-size: 2 !important; ${fontFamilyFallback} ${fontSizeFallback} ${lineHeightFallback} ${textColorFallback} ${cleanCodeStyle}`
+    wrapper: 'margin: 24px 0 !important;',
+    frame: `padding: 16px !important; ${preStyle}`,
+    scrollArea: 'display: block !important; overflow-x: auto !important; overflow-y: hidden !important; padding: 0 0 12px 0 !important; -webkit-overflow-scrolling: touch !important;',
+    content: 'display: inline-block !important; min-width: max-content !important;',
+    code: `display: block !important; background: transparent !important; white-space: pre !important; word-break: normal !important; overflow-wrap: normal !important; tab-size: 2 !important; ${fontFamilyFallback} ${fontSizeFallback} ${lineHeightFallback} ${textColorFallback} ${cleanCodeStyle}`
   };
 }
 
@@ -159,7 +177,7 @@ function sanitizeThemeCodeStyle(styleText) {
 function extractStyleValue(styleText, property) {
   if (!styleText || !property) return null;
   const escapedProperty = property.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const match = styleText.match(new RegExp(`${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
+  const match = styleText.match(new RegExp(`(?:^|;)\\s*${escapedProperty}\\s*:\\s*([^;]+)`, 'i'));
   return match ? match[1].trim() : null;
 }
 

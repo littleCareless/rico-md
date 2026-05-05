@@ -289,8 +289,41 @@
                       :class="{ active: currentCodeTheme === ct.key }"
                       @click="selectCodeTheme(ct.key)"
                     >
-                      <div class="code-theme-name">{{ ct.name }}</div>
-                      <div class="code-theme-desc">{{ ct.description }}</div>
+                      <div
+                        class="code-theme-preview"
+                        :style="{
+                          background: ct.preview.bg,
+                          borderColor: ct.preview.borderColor,
+                          color: ct.preview.textColor
+                        }"
+                      >
+                        <div
+                          class="code-theme-preview-topbar"
+                          :style="{ background: ct.preview.headerBg }"
+                        >
+                          <span class="code-theme-preview-dot dot-red"></span>
+                          <span class="code-theme-preview-dot dot-amber"></span>
+                          <span class="code-theme-preview-dot dot-green"></span>
+                        </div>
+                        <div class="code-theme-preview-code">
+                          <div
+                            v-for="(line, lineIndex) in ct.preview.lines"
+                            :key="`${ct.key}-line-${lineIndex}`"
+                            class="code-theme-preview-line"
+                          >
+                            <span
+                              v-for="(segment, segmentIndex) in line"
+                              :key="`${ct.key}-seg-${lineIndex}-${segmentIndex}`"
+                              class="code-theme-preview-segment"
+                              :style="{ color: segment.color }"
+                            >{{ segment.text }}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="code-theme-meta">
+                        <div class="code-theme-name">{{ ct.name }}</div>
+                        <div class="code-theme-desc">{{ ct.description }}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
