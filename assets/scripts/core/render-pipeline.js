@@ -1,3 +1,5 @@
+import { applyCodeHighlighting } from './code-highlight.js';
+
 /**
  * Render pipeline.
  * @module render-pipeline
@@ -65,6 +67,7 @@ function applyInlineStyles(html, styleConfig, codeTheme) {
   applyInlineCodeStyles(doc, style);
   applyStandalonePreStyles(doc, style);
   applyCodeBlockStyles(doc, style, codeTheme);
+  applyCodeHighlighting(doc, { codeTheme, styleConfig });
 
   const container = doc.createElement('div');
   container.setAttribute('style', style.container);

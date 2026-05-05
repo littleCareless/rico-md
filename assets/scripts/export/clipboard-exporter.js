@@ -4,6 +4,7 @@
  */
 
 import { convertMathForWechat, stripFormulaExportMetadata } from './math-exporter.js';
+import { applyCodeHighlighting, serializeHighlightedCodeHtml } from '../core/code-highlight.js';
 
 function extractBackgroundColor(styleString) {
   if (!styleString) return null;
@@ -115,7 +116,7 @@ function convertCodeBlocks(doc, styleConfig, codeTheme) {
 
     const codeNode = doc.createElement('code');
     codeNode.setAttribute('style', resolvedStyles.code);
-    codeNode.innerHTML = toWechatCodeHTML(code.textContent || '');
+    codeNode.innerHTML = serializeHighlightedCodeHtml(code);
 
     wrapper.appendChild(codeNode);
     block.parentNode.replaceChild(wrapper, block);
@@ -307,6 +308,7 @@ export async function copyToWechat({ renderedHTML, styleConfig, imageStore, show
     }
 
     await convertMathForWechat(doc);
+    applyCodeHighlighting(doc, { codeTheme, styleConfig });
     convertCodeBlocks(doc, styleConfig, codeTheme);
     flattenListItems(doc);
     normalizeBlockquotes(doc);
